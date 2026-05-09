@@ -15,6 +15,9 @@ Route::get('/register', [AuthController::class, 'register'])
 
 Route::post('/register', [AuthController::class, 'store'])
     ->name('register.post');
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->name('logout');
+
 Route::get('/', function () {
 
 $jobs = [
