@@ -1,0 +1,55 @@
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.role-card {
+  border-radius: var(--radius-xl);
+  padding: 36px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s;
+}
+
+.role-card:hover { transform: translateY(-4px); }
+
+.role-card.seeker { background: linear-gradient(135deg, rgba(124,111,255,0.12), rgba(124,111,255,0.04)); border: 1px solid rgba(124,111,255,0.2); }
+.role-card.recruiter { background: linear-gradient(135deg, rgba(0,212,170,0.12), rgba(0,212,170,0.04)); border: 1px solid rgba(0,212,170,0.2); }
+.role-card.admin { background: linear-gradient(135deg, rgba(245,166,35,0.12), rgba(245,166,35,0.04)); border: 1px solid rgba(245,166,35,0.2); }
+
+.role-emoji { font-size: 38px; margin-bottom: 18px; display: block; }
+
+.role-card h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+
+.role-card.seeker h3 { color: var(--primary2); }
+.role-card.recruiter h3 { color: var(--accent); }
+.role-card.admin h3 { color: var(--gold); }
+
+.role-card p { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 20px; }
+
+.role-features { list-style: none; }
+.role-features li {
+  font-size: 13px;
+  color: var(--text2);
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.role-features li::before {
+  content: '›';
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.role-card.seeker .role-features li::before { color: var(--primary2); }
+.role-card.recruiter .role-features li::before { color: var(--accent); }
+.role-card.admin .role-features li::before { color: var(--gold); }

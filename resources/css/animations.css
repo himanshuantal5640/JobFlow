@@ -1,0 +1,12 @@
+.job-card,
+.feature-card,
+.step-card,
+.role-card{
+  transition:all 0.3s ease;
+}
+
+.job-card:hover,
+.feature-card:hover,
+.step-card:hover{
+  transform:translateY(-5px);
+}
