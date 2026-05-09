@@ -4,11 +4,12 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -16,15 +17,28 @@ class User extends Authenticatable
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'name',
         'email',
         'password',
         'role',
-        'company'
+        'company',
+        'otp',
+        'otp_expires_at',
+        'is_verified',
     ];
+
+    public function sendOTP()
+    {
+        $otp = rand(100000, 999999);
+        $this->otp = $otp;
+        $this->otp_expires_at = now()->addMinutes(10);
+        $this->save();
+
+        \Illuminate\Support\Facades\Mail::to($this->email)->send(new \App\Mail\OtpMail($otp, $this->name));
+    }
 
     /**
      * The attributes that should be hidden for serialization.
