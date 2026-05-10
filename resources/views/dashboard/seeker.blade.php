@@ -3,6 +3,10 @@
 @section('title', 'Job Seeker Dashboard')
 @section('topbar_title', 'Dashboard')
 
+@section('styles')
+    @vite(['resources/css/seeker.css'])
+@endsection
+
 @section('content')
 
   <!-- Greeting Banner -->

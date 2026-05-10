@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-@vite(['resources/css/dashboard.css', 'resources/js/app.js'])
+@vite(['resources/css/dashboard.css', 'resources/css/animations.css', 'resources/js/app.js'])
 
 @yield('head')
 @yield('styles')

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JobFlow — Career Command Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    @vite(['resources/css/auth.css'])
+    @vite(['resources/css/auth.css', 'resources/css/animations.css', 'resources/js/app.js'])
 </head>
 <body style="background: #06060F;">
     <header style="position: absolute; top: 0; left: 0; right: 0; height: 80px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; z-index: 100;">
