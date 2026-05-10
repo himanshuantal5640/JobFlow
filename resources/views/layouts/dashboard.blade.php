@@ -11,6 +11,7 @@
 @vite(['resources/css/dashboard.css', 'resources/js/app.js'])
 
 @yield('head')
+@yield('styles')
 </head>
 <body class="dashboard-body">
 

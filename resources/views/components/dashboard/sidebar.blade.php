@@ -15,7 +15,7 @@
       My Applications
       <span class="nav-badge">12</span>
     </a>
-    <a class="nav-item" href="#">
+    <a class="nav-item {{ request()->routeIs('jobs.index') ? 'active' : '' }}" href="{{ route('jobs.index') }}">
       <div class="nav-icon">🔍</div>
       Browse Jobs
     </a>

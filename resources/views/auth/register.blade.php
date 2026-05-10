@@ -160,6 +160,14 @@
             </div>
         </div>
 
+        <div class="field" id="companyField" style="display: none;">
+            <label>Company Name</label>
+            <div class="field-wrap">
+                <div class="field-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+                <input type="text" name="company" placeholder="e.g. Google, Stripe">
+            </div>
+        </div>
+
         <div class="field">
             <label>Email address</label>
             <div class="field-wrap">
@@ -197,12 +205,22 @@
     const step2 = document.getElementById('regStep2');
     const dot2 = document.getElementById('step2dot');
     const line12 = document.getElementById('line12');
+    const companyField = document.getElementById('companyField');
+    const isRecruiter = document.querySelector('input[name="role"]:checked').value === 'recruiter';
 
     if (step === 2) {
       step1.style.display = 'none';
       step2.style.display = 'block';
       dot2.classList.add('active', 'done');
       line12.classList.add('done');
+      
+      if (isRecruiter) {
+        companyField.style.display = 'block';
+        companyField.querySelector('input').setAttribute('required', 'required');
+      } else {
+        companyField.style.display = 'none';
+        companyField.querySelector('input').removeAttribute('required');
+      }
     } else {
       step2.style.display = 'none';
       step1.style.display = 'block';

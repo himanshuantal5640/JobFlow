@@ -41,7 +41,11 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
-        return redirect('/dashboard');
+        
+        if ($user->role === 'recruiter') {
+            return redirect()->route('recruiter.dashboard');
+        }
+        return redirect()->route('dashboard');
     }
 
     public function authenticate(Request $request)
@@ -53,7 +57,11 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->has('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended('/dashboard');
+            $user = Auth::user();
+            if ($user->role === 'recruiter') {
+                return redirect()->intended(route('recruiter.dashboard'));
+            }
+            return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors([

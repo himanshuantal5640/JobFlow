@@ -3,13 +3,19 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\JobController;
+use App\Http\Controllers\JobListingController;
 
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
+Route::get('/dashboard', [DashboardController::class, 'seeker'])
     ->middleware(['auth'])
     ->name('dashboard');
+
+Route::get('/recruiter/dashboard', [DashboardController::class, 'recruiter'])
+    ->middleware(['auth'])
+    ->name('recruiter.dashboard');
 
 // Auth Routes
 Route::get('/login', [AuthController::class, 'login'])->name('login');
@@ -17,6 +23,11 @@ Route::post('/login', [AuthController::class, 'authenticate'])->name('login.post
 Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/register', [AuthController::class, 'store'])->name('register.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Job Routes
+Route::post('/jobs', [JobController::class, 'store'])->middleware('auth')->name('jobs.store');
+Route::get('/jobs', [JobListingController::class, 'index'])->middleware('auth')->name('jobs.index');
+Route::get('/jobs/{id}', [JobListingController::class, 'show'])->middleware('auth')->name('jobs.show');
 
 // Forgot Password (Simplified)
 Route::get('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.request');
