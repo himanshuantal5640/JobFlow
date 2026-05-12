@@ -28,6 +28,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::post('/jobs', [JobController::class, 'store'])->middleware('auth')->name('jobs.store');
 Route::get('/jobs', [JobListingController::class, 'index'])->middleware('auth')->name('jobs.index');
 Route::get('/jobs/{id}', [JobListingController::class, 'show'])->middleware('auth')->name('jobs.show');
+Route::post('/jobs/{id}/apply', [JobListingController::class, 'apply'])->middleware('auth')->name('jobs.apply');
+Route::get('/resume-analyzer', [\App\Http\Controllers\ResumeAnalyzerController::class, 'index'])->middleware('auth')->name('seeker.analyzer');
 
 // Forgot Password (Simplified)
 Route::get('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.request');

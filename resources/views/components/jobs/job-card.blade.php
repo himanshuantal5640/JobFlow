@@ -21,7 +21,7 @@
             </div>
             <div>
                 <div style="font-size:11px;color:var(--text3);">{{ $job->company }}</div>
-                <div class="jc-title">{{ $job->title }}</div>
+                <a href="{{ route('jobs.show', $job->id) }}" class="jc-title" onclick="event.stopPropagation()">{{ $job->title }}</a>
                 <div class="jc-meta">📍 {{ $job->location }} &nbsp;·&nbsp; {{ $job->work_mode }}</div>
             </div>
         </div>

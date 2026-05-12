@@ -10,6 +10,11 @@ class JobListingController extends Controller
 {
     public function index(Request $request)
     {
+        // If no jobs exist in the DB, let's create some sample jobs automatically
+        if (JobPost::count() == 0) {
+            $this->seedSampleJobs();
+        }
+
         $query = JobPost::where('status', 'active');
 
         // Search
@@ -75,7 +80,104 @@ class JobListingController extends Controller
 
     public function show($id)
     {
-        $job = JobPost::findOrFail($id);
-        return response()->json($job);
+        $job = JobPost::withCount('applications')->findOrFail($id);
+        if (request()->wantsJson()) {
+            return response()->json($job);
+        }
+
+        return view('jobs.show', compact('job'));
+    }
+
+    public function apply($id)
+    {
+        \App\Models\Application::firstOrCreate([
+            'user_id' => auth()->id(),
+            'job_post_id' => $id,
+        ], [
+            'status' => 'pending'
+        ]);
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Application submitted successfully!');
+    }
+
+    private function seedSampleJobs()
+    {
+        $sampleJobs = [
+            [
+                'title' => 'Frontend Architect',
+                'company' => 'Airbnb',
+                'department' => 'Engineering',
+                'location' => 'Remote',
+                'salary' => '$175K - $220K',
+                'experience' => 'Staff / Lead',
+                'work_mode' => 'Remote',
+                'job_type' => 'Full-time',
+                'skills' => json_encode(['React', 'GraphQL', 'TypeScript']),
+                'match' => 94,
+                'status' => 'active',
+                'description' => 'We are looking for a Frontend Architect to lead our core UI infrastructure...',
+                'recruiter_id' => 1,
+            ],
+            [
+                'title' => 'Senior Software Engineer',
+                'company' => 'Google',
+                'department' => 'Engineering',
+                'location' => 'Mountain View, CA',
+                'salary' => '$160K - $200K',
+                'experience' => 'Senior',
+                'work_mode' => 'Hybrid',
+                'job_type' => 'Full-time',
+                'skills' => json_encode(['React', 'TypeScript', 'GCP', 'Node.js']),
+                'match' => 88,
+                'status' => 'active',
+                'description' => 'Join our core infrastructure team to build scalable applications...',
+                'recruiter_id' => 1,
+            ],
+            [
+                'title' => 'AI Engineer',
+                'company' => 'OpenAI',
+                'department' => 'AI / ML',
+                'location' => 'San Francisco, CA',
+                'salary' => '$190K - $250K',
+                'experience' => 'Senior',
+                'work_mode' => 'On-site',
+                'job_type' => 'Full-time',
+                'skills' => json_encode(['Python', 'PyTorch', 'LLMs']),
+                'match' => 92,
+                'status' => 'active',
+                'description' => 'Help us push the boundaries of artificial intelligence...',
+                'recruiter_id' => 1,
+            ],
+            [
+                'title' => 'Product Manager',
+                'company' => 'Stripe',
+                'department' => 'Product',
+                'location' => 'Remote',
+                'salary' => '$150K - $180K',
+                'experience' => 'Mid',
+                'work_mode' => 'Remote',
+                'job_type' => 'Full-time',
+                'skills' => json_encode(['Agile', 'Jira', 'Fintech']),
+                'match' => 85,
+                'status' => 'active',
+                'description' => 'Lead product development for our core payment APIs...',
+                'recruiter_id' => 1,
+            ]
+        ];
+
+        // Ensure user ID 1 exists as a recruiter fallback
+        $user = \App\Models\User::firstOrCreate(
+            ['email' => 'admin@jobflow.com'],
+            ['name' => 'Admin Recruiter', 'password' => bcrypt('password')]
+        );
+
+        foreach ($sampleJobs as &$job) {
+            $job['recruiter_id'] = $user->id;
+            JobPost::create($job);
+        }
     }
 }

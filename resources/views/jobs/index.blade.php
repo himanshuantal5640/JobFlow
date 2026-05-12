@@ -3,7 +3,7 @@
 @section('title', 'Browse Jobs — JobFlow')
 
 @section('styles')
-    @vite(['resources/css/jobs.css'])
+    @vite(['resources/css/jobs.css', 'resources/css/job-details.css'])
     <style>
         /* Small overrides to fit with the dashboard layout if needed */
         .page-wrap { margin-left: 0; margin-top: 0; }
@@ -163,8 +163,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="so-footer">
-                        <button class="btn btn-indigo" style="flex:1; justify-content:center;" onclick="openQuickApply(${job.id})">Quick Apply →</button>
+                    <div class="so-footer" style="display:flex; gap:10px;">
+                        <a href="/jobs/${job.id}" class="btn btn-ghost" style="flex:1; justify-content:center;">Full Details ↗</a>
+                        <button class="btn btn-indigo" style="flex:1.5; justify-content:center;" onclick="openQuickApply(${job.id})">Quick Apply →</button>
                     </div>
                 `;
                 document.getElementById('slideoverContent').innerHTML = content;
@@ -177,36 +178,159 @@
         document.getElementById('slideoverOverlay').classList.remove('open');
     }
 
+    let modalStep = 1;
+    let currentApplyJobId = null;
+
     function openQuickApply(id) {
-        // Simple modal content for now
-        document.getElementById('applyModalContent').innerHTML = `
-            <div class="modal-title">Apply for Job</div>
-            <p class="modal-sub">You are applying for job #${id}</p>
-            <form action="{{ route('jobs.store') }}" method="POST">
-                @csrf
-                <input type="hidden" name="job_post_id" value="${id}">
-                <div class="mf">
-                    <label class="ml">Your Resume</label>
-                    <select class="mi" name="resume_id">
-                        <option value="1">Primary_Resume.pdf</option>
-                    </select>
-                </div>
-                <div class="mf">
-                    <label class="ml">Cover Letter</label>
-                    <textarea class="mi" name="cover_letter" rows="4"></textarea>
-                </div>
-                <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button type="button" class="btn btn-ghost" style="flex:1;" onclick="closeApplyModal()">Cancel</button>
-                    <button type="submit" class="btn btn-indigo" style="flex:1;">Submit Application</button>
-                </div>
-            </form>
-        `;
-        document.getElementById('applyModal').classList.add('open');
+        currentApplyJobId = id;
+        fetch(`/jobs/${id}`)
+            .then(res => res.json())
+            .then(job => {
+                const userName = '{{ auth()->user()->name ?? "User" }}';
+                const userEmail = '{{ auth()->user()->email ?? "email@example.com" }}';
+                const csrfToken = '{{ csrf_token() }}';
+                
+                document.getElementById('applyModalContent').innerHTML = `
+    <div class="modal-head">
+      <div>
+        <div class="modal-job-title">Apply to ${job.company || 'Company'}</div>
+        <div class="modal-company">${job.title} · ${job.department || 'Engineering'} · ${job.location || 'Remote'}</div>
+      </div>
+      <div class="modal-x" onclick="closeApplyModal()">✕</div>
+    </div>
+
+    <div class="modal-steps" id="modalSteps">
+      <div class="ms-item active" id="step1item"><div class="ms-circle">1</div><div class="ms-label">Resume</div></div>
+      <div class="ms-line" id="line12"></div>
+      <div class="ms-item" id="step2item"><div class="ms-circle">2</div><div class="ms-label">Details</div></div>
+      <div class="ms-line" id="line23"></div>
+      <div class="ms-item" id="step3item"><div class="ms-circle">3</div><div class="ms-label">Review</div></div>
+    </div>
+
+    <div id="step1content">
+      <div class="mf">
+        <label class="ml">Choose Resume</label>
+        <select class="mi">
+          <option>✓ ${userName}_Resume_v3.pdf (ATS Score: 94%)</option>
+          <option>${userName}_Resume_v2.pdf (ATS Score: 78%)</option>
+        </select>
+      </div>
+      <div class="mf">
+        <div class="upload-box" onclick="alert('Opening file picker…')">
+          <div class="ub-icon">📄</div>
+          <p>Upload a different resume</p>
+          <span>PDF or DOCX · Max 5MB</span>
+        </div>
+      </div>
+      <div class="mf">
+        <label class="ml">Cover Letter <span style="color:var(--text3);font-weight:400;">(recommended)</span></label>
+        <textarea class="mi" rows="3" style="resize:vertical;" placeholder="Tell ${job.company || 'the company'} why you're a perfect fit..."></textarea>
+      </div>
+      <div class="ats-chip">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="var(--green)" stroke-width="1.3"/><path d="M5 8.5L7 10.5L11 6" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span style="font-size:12px;color:var(--green);">Your resume matches <strong>${job.match || 91}%</strong> of this role's requirements!</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" style="flex:1;justify-content:center;" onclick="closeApplyModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" style="flex:1.5;justify-content:center;" onclick="goModalStep(2)">Continue →</button>
+      </div>
+    </div>
+
+    <div id="step2content" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" class="mf">
+        <div><label class="ml">LinkedIn Profile</label><input class="mi" type="url" value="linkedin.com/in/you"></div>
+        <div><label class="ml">Portfolio / GitHub</label><input class="mi" type="url" value="github.com/you"></div>
+      </div>
+      <div class="mf"><label class="ml">Expected Salary</label><input class="mi" type="text" value="${job.salary || '$150,000'}"></div>
+      <div class="mf">
+        <label class="ml">Notice Period</label>
+        <select class="mi"><option>2 weeks</option><option selected>4 weeks</option></select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" style="flex:0.8;justify-content:center;" onclick="goModalStep(1)">← Back</button>
+        <button type="button" class="btn btn-primary" style="flex:1.5;justify-content:center;" onclick="goModalStep(3)">Review Application →</button>
+      </div>
+    </div>
+
+    <div id="step3content" style="display:none;">
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--rl);padding:16px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;">${userName[0]}</div>
+          <div><div style="font-weight:700;">${userName}</div><div style="font-size:12px;color:var(--text3);">${userEmail}</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+          <div>📄 <strong>Resume:</strong> v3</div><div>💰 <strong>Expected:</strong> ${job.salary || '$150K'}</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" style="flex:0.8;justify-content:center;" onclick="goModalStep(2)">← Edit</button>
+        <button type="button" class="btn btn-primary" style="flex:1.5;justify-content:center;" onclick="submitApplication()">Submit Application ✦</button>
+      </div>
+    </div>
+
+    <div id="successContent" style="display:none;text-align:center;padding:14px 0;">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--green-dim);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;">✓</div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:8px;">Application Submitted!</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:20px;">The recruiting team will review your application soon.</p>
+      <button type="button" class="btn btn-ghost" onclick="closeApplyModal()">Close</button>
+    </div>
+                `;
+                document.getElementById('applyModal').classList.add('open');
+                goModalStep(1);
+            });
     }
 
     function closeApplyModal() {
         document.getElementById('applyModal').classList.remove('open');
     }
+
+    function closeModalOutside(e) {
+        if (e.target === document.getElementById('applyModal')) closeApplyModal();
+    }
+
+    function goModalStep(step) {
+      modalStep = step;
+      ['step1content','step2content','step3content','successContent'].forEach((id,i) => {
+        if(document.getElementById(id)) document.getElementById(id).style.display = (i === step - 1) ? 'block' : 'none';
+      });
+      for (let i = 1; i <= 3; i++) {
+        const item = document.getElementById('step' + i + 'item');
+        if(!item) continue;
+        const circle = item.querySelector('.ms-circle');
+        item.classList.remove('active','done');
+        if (i < step) { item.classList.add('done'); circle.innerHTML = '✓'; }
+        else if (i === step) { item.classList.add('active'); circle.textContent = i; }
+        else { circle.textContent = i; }
+      }
+      if (document.getElementById('line12')) {
+        document.getElementById('line12').classList.toggle('done', step > 1);
+        document.getElementById('line23').classList.toggle('done', step > 2);
+      }
+    }
+
+    function submitApplication() {
+        fetch(`/jobs/${currentApplyJobId}/apply`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                ['step1content','step2content','step3content'].forEach(id => {
+                  if(document.getElementById(id)) document.getElementById(id).style.display = 'none';
+                });
+                document.getElementById('successContent').style.display = 'block';
+                if(document.getElementById('modalSteps')) document.getElementById('modalSteps').style.display = 'none';
+            }
+        });
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeApplyModal();
+    });
 
     function toggleBookmark(btn, id) {
         btn.classList.toggle('saved');

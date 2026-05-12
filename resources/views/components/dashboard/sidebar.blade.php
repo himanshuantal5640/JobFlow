@@ -28,7 +28,7 @@
 
   <div class="sidebar-section">
     <div class="sidebar-section-label">Tools</div>
-    <a class="nav-item" href="#">
+    <a class="nav-item {{ request()->routeIs('seeker.analyzer') ? 'active' : '' }}" href="{{ route('seeker.analyzer') }}">
       <div class="nav-icon">📄</div>
       Resume Analyzer
     </a>
