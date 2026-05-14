@@ -25,7 +25,7 @@
         </div>
         
         <div class="job-tags">
-          @foreach(json_decode($job->skills) as $skill)
+          @foreach(array_slice(json_decode($job->skills ?? '[]', true) ?: [], 0, 8) as $skill)
           <span class="tag">{{ $skill }}</span>
           @endforeach
         </div>
@@ -35,7 +35,7 @@
             <div class="job-salary">$140K – $220K <span>/ year</span></div>
             <div class="job-meta">📍 Remote&nbsp;•&nbsp; ⏱ Full-time</div>
           </div>
-          <a href="#" class="btn btn-primary" style="padding:8px 16px;font-size:13px;border-radius:9px;">Apply</a>
+          <a href="{{ route('login') }}" class="btn btn-primary" style="padding:8px 16px;font-size:13px;border-radius:9px;">Apply</a>
         </div>
         
         <div class="match-bar">
@@ -68,7 +68,7 @@
             <div class="job-salary">$200K – $280K <span>/ year</span></div>
             <div class="job-meta">📍 Menlo Park, CA&nbsp;•&nbsp; ⏱ Full-time</div>
           </div>
-          <a href="#" class="btn btn-primary" style="padding:8px 16px;font-size:13px;border-radius:9px;">Apply</a>
+          <a href="{{ route('login') }}" class="btn btn-primary" style="padding:8px 16px;font-size:13px;border-radius:9px;">Apply</a>
         </div>
         <div class="match-bar">
           <span class="match-label">Match</span>
@@ -84,7 +84,7 @@
           <div style="font-size:32px;margin-bottom:14px;">🔍</div>
           <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:600;color:var(--text2);margin-bottom:8px;">Browse All Jobs</div>
           <div style="font-size:13px;color:var(--text3);margin-bottom:16px;">12,000+ opportunities waiting</div>
-          <a href="#" class="btn btn-ghost" style="font-size:13px;padding:8px 18px;">View All →</a>
+          <a href="{{ route('register') }}" class="btn btn-ghost" style="font-size:13px;padding:8px 18px;">View All →</a>
         </div>
       </div>
 

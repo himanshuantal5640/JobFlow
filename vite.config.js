@@ -13,7 +13,9 @@ export default defineConfig({
                 'resources/css/recruiter.css',
                 'resources/css/seeker.css',
                 'resources/css/job-details.css',
+                'resources/css/analyzer.css',
                 'resources/css/animations.css',
+                'resources/css/messages.css',
                 'resources/js/app.js'
             ],
             refresh: true,

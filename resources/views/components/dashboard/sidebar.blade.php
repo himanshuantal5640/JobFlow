@@ -1,73 +1,57 @@
 <aside class="sidebar">
-  <a href="{{ url('/') }}" class="sidebar-logo">
-    <div class="logo-mark">J</div>
-    <span class="logo-name">Job<span>Flow</span></span>
-  </a>
+  <div class="logo-row">
+    <div class="logo-icon">J</div>
+    <div class="logo-text">JobFlow</div>
+  </div>
 
-  <div class="sidebar-section">
-    <div class="sidebar-section-label">Overview</div>
-    <a class="nav-item {{ Request::is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-      <div class="nav-icon">⊞</div>
-      Dashboard
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <a href="{{ auth()->user()->role === 'recruiter' ? route('recruiter.dashboard') : route('dashboard') }}" class="nav-item {{ request()->routeIs('recruiter.dashboard') || request()->routeIs('dashboard') ? 'active' : '' }}">
+      <span>📊</span> Dashboard
     </a>
-    <a class="nav-item {{ Request::is('applications*') ? 'active' : '' }}" href="#">
-      <div class="nav-icon">📋</div>
-      My Applications
-      <span class="nav-badge">12</span>
-    </a>
-    <a class="nav-item {{ request()->routeIs('jobs.index') ? 'active' : '' }}" href="{{ route('jobs.index') }}">
-      <div class="nav-icon">🔍</div>
-      Browse Jobs
-    </a>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">★</div>
-      Saved Jobs
-      <span class="nav-badge" style="background:var(--gold);">5</span>
+    
+    @if(auth()->user()->role === 'recruiter')
+      <a href="{{ route('recruiter.dashboard') }}#section-job-postings" class="nav-item">
+        <span>📋</span> My Job Posts
+      </a>
+      <a href="{{ route('recruiter.dashboard') }}#section-applicants" class="nav-item">
+        <span>👥</span> All Applicants
+      </a>
+    @else
+      <a href="{{ route('dashboard') }}" class="nav-item">
+        <span>💼</span> My Applications
+      </a>
+      <a href="{{ route('jobs.index') }}" class="nav-item {{ request()->routeIs('jobs.index') ? 'active' : '' }}">
+        <span>🔍</span> Browse Jobs
+      </a>
+    @endif
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Hiring</div>
+    @if(auth()->user()->role === 'recruiter')
+      <a href="{{ route('recruiter.interviews') }}" class="nav-item {{ request()->routeIs('recruiter.interviews') ? 'active' : '' }}"><span>🗓</span> Interviews</a>
+      <a href="{{ route('recruiter.offers') }}" class="nav-item {{ request()->routeIs('recruiter.offers') ? 'active' : '' }}"><span>🚀</span> Offers Sent</a>
+    @else
+      <a href="{{ route('seeker.analyzer') }}" class="nav-item {{ request()->routeIs('seeker.analyzer') ? 'active' : '' }}"><span>📄</span> Resume Analyzer</a>
+      <a href="{{ route('seeker.interviews') }}" class="nav-item {{ request()->routeIs('seeker.interviews') ? 'active' : '' }}"><span>🗓</span> My Interviews</a>
+    @endif
+    
+    <a href="{{ route('messages.index') }}" class="nav-item {{ request()->routeIs('messages.*') ? 'active' : '' }}">
+      <span>💬</span> Messages
     </a>
   </div>
 
-  <div class="sidebar-section">
-    <div class="sidebar-section-label">Tools</div>
-    <a class="nav-item {{ request()->routeIs('seeker.analyzer') ? 'active' : '' }}" href="{{ route('seeker.analyzer') }}">
-      <div class="nav-icon">📄</div>
-      Resume Analyzer
+  <div class="nav-section" style="margin-top:auto;">
+    <div class="nav-label">Settings</div>
+    <a href="{{ auth()->user()->role === 'recruiter' ? route('recruiter.profile') : route('seeker.profile') }}" class="nav-item {{ request()->routeIs('recruiter.profile') || request()->routeIs('seeker.profile') ? 'active' : '' }}">
+      <span>{{ auth()->user()->role === 'recruiter' ? '🏢' : '👤' }}</span> Profile Settings
     </a>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">💬</div>
-      Messages
-      <span class="nav-badge" style="background:var(--pink);">3</span>
-    </a>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">📅</div>
-      Interviews
-    </a>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">📊</div>
-      Analytics
-    </a>
-  </div>
-
-  <div class="sidebar-section">
-    <div class="sidebar-section-label">Account</div>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">⚙</div>
-      Settings
-    </a>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">?</div>
-      Help Center
-    </a>
-  </div>
-
-  <div class="sidebar-profile">
-    <div class="profile-avatar">{{ strtoupper(substr(Auth::user()->name ?? 'Guest', 0, 2)) }}</div>
-    <div>
-      <div class="profile-name">{{ Auth::user()->name ?? 'Guest User' }}</div>
-      <div class="profile-role">Job Seeker · Pro</div>
-    </div>
-    <form action="{{ route('logout') }}" method="POST" id="logout-form" style="display:none;">@csrf</form>
-    <svg class="profile-menu-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="cursor:pointer;">
-        <path d="M2 5L7 9L12 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
+    <form action="{{ route('logout') }}" method="POST" style="margin-top: 8px;">
+      @csrf
+      <button type="submit" class="nav-item" style="background:none; border:none; width:100%; cursor:pointer; text-align:left;">
+        <span>🚪</span> Logout
+      </button>
+    </form>
   </div>
 </aside>

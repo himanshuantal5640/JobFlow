@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Application;
 use App\Models\JobPost;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class JobListingController extends Controller
@@ -20,29 +22,29 @@ class JobListingController extends Controller
         // Search
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('company', 'like', "%{$search}%")
-                  ->orWhere('skills', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('company', 'like', "%{$search}%")
+                    ->orWhere('skills', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
         // Filters
         if ($request->has('job_type')) {
-            $query->whereIn('job_type', (array)$request->job_type);
+            $query->whereIn('job_type', (array) $request->job_type);
         }
 
         if ($request->has('work_mode')) {
-            $query->whereIn('work_mode', (array)$request->work_mode);
+            $query->whereIn('work_mode', (array) $request->work_mode);
         }
 
         if ($request->has('experience')) {
-            $query->whereIn('experience', (array)$request->experience);
+            $query->whereIn('experience', (array) $request->experience);
         }
 
         if ($request->has('department')) {
-            $query->whereIn('department', (array)$request->department);
+            $query->whereIn('department', (array) $request->department);
         }
 
         // Salary Filter (assuming $request->salary is the minimum)
@@ -81,6 +83,11 @@ class JobListingController extends Controller
     public function show($id)
     {
         $job = JobPost::withCount('applications')->findOrFail($id);
+
+        if ($job->status !== 'active' && (! Auth::check() || (int) Auth::id() !== (int) $job->recruiter_id)) {
+            abort(404);
+        }
+
         if (request()->wantsJson()) {
             return response()->json($job);
         }
@@ -90,11 +97,16 @@ class JobListingController extends Controller
 
     public function apply($id)
     {
-        \App\Models\Application::firstOrCreate([
+        $job = JobPost::findOrFail($id);
+        if ($job->status !== 'active') {
+            abort(404);
+        }
+
+        Application::firstOrCreate([
             'user_id' => auth()->id(),
             'job_post_id' => $id,
         ], [
-            'status' => 'pending'
+            'status' => 'applied',
         ]);
 
         if (request()->wantsJson() || request()->ajax()) {
@@ -116,7 +128,7 @@ class JobListingController extends Controller
                 'experience' => 'Staff / Lead',
                 'work_mode' => 'Remote',
                 'job_type' => 'Full-time',
-                'skills' => json_encode(['React', 'GraphQL', 'TypeScript']),
+                'skills' => ['React', 'GraphQL', 'TypeScript'],
                 'match' => 94,
                 'status' => 'active',
                 'description' => 'We are looking for a Frontend Architect to lead our core UI infrastructure...',
@@ -131,7 +143,7 @@ class JobListingController extends Controller
                 'experience' => 'Senior',
                 'work_mode' => 'Hybrid',
                 'job_type' => 'Full-time',
-                'skills' => json_encode(['React', 'TypeScript', 'GCP', 'Node.js']),
+                'skills' => ['React', 'TypeScript', 'GCP', 'Node.js'],
                 'match' => 88,
                 'status' => 'active',
                 'description' => 'Join our core infrastructure team to build scalable applications...',
@@ -146,7 +158,7 @@ class JobListingController extends Controller
                 'experience' => 'Senior',
                 'work_mode' => 'On-site',
                 'job_type' => 'Full-time',
-                'skills' => json_encode(['Python', 'PyTorch', 'LLMs']),
+                'skills' => ['Python', 'PyTorch', 'LLMs'],
                 'match' => 92,
                 'status' => 'active',
                 'description' => 'Help us push the boundaries of artificial intelligence...',
@@ -161,18 +173,23 @@ class JobListingController extends Controller
                 'experience' => 'Mid',
                 'work_mode' => 'Remote',
                 'job_type' => 'Full-time',
-                'skills' => json_encode(['Agile', 'Jira', 'Fintech']),
+                'skills' => ['Agile', 'Jira', 'Fintech'],
                 'match' => 85,
                 'status' => 'active',
                 'description' => 'Lead product development for our core payment APIs...',
                 'recruiter_id' => 1,
-            ]
+            ],
         ];
 
         // Ensure user ID 1 exists as a recruiter fallback
-        $user = \App\Models\User::firstOrCreate(
+        $user = User::firstOrCreate(
             ['email' => 'admin@jobflow.com'],
-            ['name' => 'Admin Recruiter', 'password' => bcrypt('password')]
+            [
+                'name' => 'Admin Recruiter',
+                'password' => bcrypt('password'),
+                'role' => 'recruiter',
+                'company' => 'JobFlow',
+            ]
         );
 
         foreach ($sampleJobs as &$job) {

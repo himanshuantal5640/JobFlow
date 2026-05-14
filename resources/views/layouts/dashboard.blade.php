@@ -6,7 +6,7 @@
 <title>{{ config('app.name', 'JobFlow') }} — @yield('title', 'Dashboard')</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 @vite(['resources/css/dashboard.css', 'resources/css/animations.css', 'resources/js/app.js'])
 
@@ -15,16 +15,15 @@
 </head>
 <body class="dashboard-body">
 
-    <!-- SIDEBAR -->
-    @include('components.dashboard.sidebar')
+    <div class="app-container" style="display: flex; width: 100%; min-height: 100vh;">
+        <!-- SIDEBAR -->
+        @include('components.dashboard.sidebar')
 
-    <!-- TOPBAR -->
-    @include('components.dashboard.topbar')
-
-    <!-- MAIN CONTENT -->
-    <main class="main">
-        @yield('content')
-    </main>
+        <!-- MAIN CONTENT -->
+        <main class="main" style="flex: 1; padding: 24px 40px; overflow-y: auto;">
+            @yield('content')
+        </main>
+    </div>
 
     @yield('scripts')
 
@@ -32,24 +31,29 @@
         // Common Dashboard JS
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', function(e) {
-                // If it's a real link, don't prevent default
-                if (this.getAttribute('href') !== '#') return;
-                
-                e.preventDefault();
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                this.classList.add('active');
+                if (this.getAttribute('href') === '#') e.preventDefault();
             });
         });
 
         // Toast functionality
         window.showToast = function(msg) {
             const t = document.createElement('div');
-            t.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--surface3);border:1px solid var(--border2);border-radius:10px;padding:10px 18px;font-size:13px;color:var(--text);z-index:999;transition:all 0.3s ease;opacity:0;font-family:'DM Sans',sans-serif;box-shadow:0 8px 24px rgba(0,0,0,0.4);`;
+            t.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--teal);border-radius:12px;padding:12px 24px;font-size:14px;color:#060912;font-weight:700;z-index:9999;transition:all 0.3s ease;opacity:0;box-shadow:0 8px 24px rgba(0,212,170,0.3);`;
             t.textContent = msg;
             document.body.appendChild(t);
             requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
-            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2000);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
         };
     </script>
+
+    @if(session('success'))
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof window.showToast === 'function') {
+            window.showToast(@json(session('success')));
+        }
+    });
+    </script>
+    @endif
 </body>
 </html>

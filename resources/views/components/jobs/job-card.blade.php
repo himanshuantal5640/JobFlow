@@ -10,7 +10,7 @@
         'Infrastructure' => 'rose'
     ];
     $accent = $accentMap[$job->department] ?? 'indigo';
-    $skills = json_decode($job->skills ?? '[]');
+    $skills = $job->skillsList();
 @endphp
 
 <div class="job-card jc-accent-{{ $accent }}" onclick="openJob({{ $job->id }})">

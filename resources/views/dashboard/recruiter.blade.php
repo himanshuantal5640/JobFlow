@@ -1,445 +1,416 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JobFlow — Recruiter Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-@vite(['resources/css/recruiter.css', 'resources/css/animations.css', 'resources/js/app.js'])
-</head>
-<body class="recruiter-dashboard-body">
+@extends('layouts.dashboard')
 
-<!-- ═══════════════ SIDEBAR ═══════════════ -->
-<aside class="sidebar">
-  <a href="/" class="sidebar-logo">
-    <div class="logo-gem">J</div>
-    <span class="logo-word">Job<em>Flow</em></span>
-  </a>
+@section('title', 'Recruiter Portal')
 
-  <div class="sidebar-role-tag">Recruiter Portal</div>
+@section('head')
+  @vite(['resources/css/recruiter.css'])
+@endsection
 
-  <div class="nav-group">
-    <div class="nav-group-label">Overview</div>
-    <a class="nav-item active" href="#">
-      <div class="nav-icon">⊞</div> Dashboard
-    </a>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">📋</div> My Job Posts
-      <span class="nav-badge">{{ $activeJobsCount }}</span>
-    </a>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">👥</div> All Applicants
-      <span class="nav-badge amber">{{ $totalApplicants }}</span>
-    </a>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">⭐</div> Shortlisted
-      <span class="nav-badge">{{ $shortlistedCount }}</span>
-    </a>
-  </div>
-
-  <div class="nav-group">
-    <div class="nav-group-label">Hiring</div>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">📅</div> Interviews
-      <span class="nav-badge amber">{{ $interviewsCount }}</span>
-    </a>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">🎯</div> Offers Sent
-    </a>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">💬</div> Messages
-      <span class="nav-badge rose">7</span>
-    </a>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">📊</div> Analytics
-    </a>
-  </div>
-
-  <div class="nav-group">
-    <div class="nav-group-label">Settings</div>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">🏢</div> Company Profile
-    </a>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">👤</div> Team Members
-    </a>
-    <a class="nav-item" href="#">
-      <div class="nav-icon">⚙</div> Preferences
-    </a>
-  </div>
-
-  <div class="sidebar-company">
-    <div class="company-row">
-      <div class="company-logo">{{ substr(auth()->user()->company ?? auth()->user()->name, 0, 1) }}</div>
+@section('content')
+    <header class="header">
       <div>
-        <div class="company-name">{{ auth()->user()->company ?? auth()->user()->name }}</div>
-        <div class="company-sub">Recruiter · Pro Plan</div>
+        <h1 class="page-title">Recruiter Dashboard</h1>
+        <p class="page-sub">{{ now()->format('l, j F Y') }} · {{ auth()->user()->company ?? 'TechVenture Inc.' }}</p>
       </div>
-    </div>
-    <div class="company-stats">
-      <div class="co-stat">
-        <div class="co-stat-val">{{ $activeJobsCount }}</div>
-        <div class="co-stat-label">Active</div>
+      <div class="header-actions">
+        <div class="icon-btn" style="background:var(--s2); padding:8px; border-radius:10px; cursor:pointer;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <div class="icon-btn" style="background:var(--s2); padding:8px; border-radius:10px; cursor:pointer; position:relative;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            @if($messagesCount > 0)<div style="position:absolute; top:8px; right:8px; width:8px; height:8px; background:var(--teal); border-radius:50%; border:2px solid var(--s2);"></div>@endif
+        </div>
+        <button class="btn btn-teal" onclick="openModal()">+ Post New Job</button>
       </div>
-      <div class="co-stat">
-        <div class="co-stat-val">{{ $totalApplicants }}</div>
-        <div class="co-stat-label">Applied</div>
+    </header>
+
+    <!-- ── STATS GRID ── -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon-wrap" style="background:var(--teal-d); color:var(--teal);">📋</div>
+        <div class="stat-value" style="color:var(--teal);" data-target="{{ $activeJobsCount }}">0</div>
+        <div class="stat-label">Active Postings</div>
+        <div class="stat-delta up">{{ $jobDeltaLabel }}</div>
       </div>
-      <div class="co-stat">
-        <div class="co-stat-val">{{ $shortlistedCount }}</div>
-        <div class="co-stat-label">Shortlist</div>
+      <div class="stat-card">
+        <div class="stat-icon-wrap" style="background:var(--amber-d); color:var(--amber);">📥</div>
+        <div class="stat-value" style="color:var(--amber);" data-target="{{ $totalApplicants }}">0</div>
+        <div class="stat-label">Total Applicants</div>
+        <div class="stat-delta up">{{ $applicantDeltaLabel }}</div>
       </div>
-    </div>
-  </div>
-</aside>
-
-<!-- ═══════════════ TOPBAR ═══════════════ -->
-<header class="topbar">
-  <div>
-    <div class="page-title">Recruiter Dashboard</div>
-    <div class="page-sub">{{ date('l, d F Y') }} · {{ auth()->user()->company ?? 'Your Company' }}</div>
-  </div>
-  <div class="topbar-search">
-    <svg class="topbar-search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 9.5L13 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-    <input type="text" placeholder="Search candidates, jobs…">
-  </div>
-  <div class="topbar-right">
-    <div class="icon-btn" style="position:relative;">
-      <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5C5 1.5 3 3.5 3 6V9.5L1.5 11H13.5L12 9.5V6C12 3.5 10 1.5 7.5 1.5Z" stroke="currentColor" stroke-width="1.3"/><path d="M6 11C6 11.83 6.67 12.5 7.5 12.5S9 11.83 9 11" stroke="currentColor" stroke-width="1.3"/></svg>
-      <div class="notif-dot"></div>
-    </div>
-    <div class="icon-btn">
-      <form action="{{ route('logout') }}" method="POST">
-        @csrf
-        <button type="submit" style="background:none;border:none;color:inherit;cursor:pointer;">
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M2 13c0-2.76 2.46-5 5.5-5s5.5 2.24 5.5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        </button>
-      </form>
-    </div>
-    <button class="btn btn-teal" onclick="openModal()">
-      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1.5V11.5M1.5 6.5H11.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      Post New Job
-    </button>
-  </div>
-</header>
-
-<!-- ═══════════════ MAIN ═══════════════ -->
-<main class="main">
-
-  @if(session('success'))
-    <div style="background: rgba(0, 212, 170, 0.1); border: 1px solid var(--teal); color: var(--teal); padding: 12px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; display: flex; align-items: center; gap: 8px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-        {{ session('success') }}
-    </div>
-  @endif
-
-  <!-- ── STATS ROW ── -->
-  <div class="stats-row a0">
-    <div class="stat-card st-teal">
-      <div class="stat-icon" style="background:var(--teal-d);">📋</div>
-      <div class="stat-val" style="color:var(--teal);" data-target="{{ $activeJobsCount }}">0</div>
-      <div class="stat-lbl">Active Postings</div>
-      <div class="stat-delta up">↑ +2 this month</div>
-    </div>
-    <div class="stat-card st-amber">
-      <div class="stat-icon" style="background:var(--amber-d);">📥</div>
-      <div class="stat-val" style="color:var(--amber);" data-target="{{ $totalApplicants }}">0</div>
-      <div class="stat-lbl">Total Applicants</div>
-      <div class="stat-delta up">↑ +38 this week</div>
-    </div>
-    <div class="stat-card st-sky">
-      <div class="stat-icon" style="background:var(--sky-d);">⭐</div>
-      <div class="stat-val" style="color:var(--sky);" data-target="{{ $shortlistedCount }}">0</div>
-      <div class="stat-lbl">Shortlisted</div>
-      <div class="stat-delta up">↑ +5 this week</div>
-    </div>
-    <div class="stat-card st-violet">
-      <div class="stat-icon" style="background:var(--violet-d);">🗓</div>
-      <div class="stat-val" style="color:var(--violet);" data-target="{{ $interviewsCount }}">0</div>
-      <div class="stat-lbl">Interviews Scheduled</div>
-      <div class="stat-delta up">↑ +3 this week</div>
-    </div>
-    <div class="stat-card st-rose">
-      <div class="stat-icon" style="background:var(--rose-d);">⚡</div>
-      <div class="stat-val" style="color:var(--rose);" data-target="12">0</div>
-      <div class="stat-lbl">Avg. Days to Hire</div>
-      <div class="stat-delta up">↓ −3 vs last quarter</div>
-    </div>
-  </div>
-
-  <!-- ── JOB POSTINGS TABLE ── -->
-  <div class="jobs-section a1">
-    <div class="sh">
-      <span class="sh-title">Active Job Postings</span>
-      <div class="sh-right">
-        <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px;">Filter ▾</button>
-        <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px;">Export</button>
-        <button class="btn btn-teal" style="font-size:12px;padding:6px 14px;" onclick="openModal()">+ Post Job</button>
+      <div class="stat-card">
+        <div class="stat-icon-wrap" style="background:var(--sky-d); color:var(--sky);">⭐</div>
+        <div class="stat-value" style="color:var(--sky);" data-target="{{ $shortlistedCount }}">0</div>
+        <div class="stat-label">Shortlisted</div>
+        <div class="stat-delta up">{{ $shortlistedDeltaLabel }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-wrap" style="background:var(--violet-d); color:var(--violet);">🗓</div>
+        <div class="stat-value" style="color:var(--violet);" data-target="{{ $interviewsCount }}">0</div>
+        <div class="stat-label">Interviews Scheduled</div>
+        <div class="stat-delta up">{{ $interviewDeltaLabel }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-wrap" style="background:var(--rose-d); color:var(--rose);">⚡</div>
+        @if($avgDaysToHire !== null)
+          <div class="stat-value" style="color:var(--rose);" data-target="{{ $avgDaysToHire }}">0</div>
+        @else
+          <div class="stat-value" style="color:var(--rose);">—</div>
+        @endif
+        <div class="stat-label">Avg. Days to Hire</div>
+        <div class="stat-delta down">{{ $hireDeltaLabel ?? '-3 vs last quarter' }}</div>
       </div>
     </div>
 
-    <div class="jobs-table">
+    <!-- ── ACTIVE JOB POSTINGS ── -->
+    <div class="section-header" id="section-job-postings">
+      <h2 class="section-title">Job Postings</h2>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <div style="display:flex; background:var(--s2); padding:4px; border-radius:10px; margin-right:12px;">
+            <a href="?status=active" class="btn {{ $statusFilter === 'active' ? 'btn-teal' : 'btn-ghost' }}" style="padding:6px 12px; font-size:11px; border-radius:8px;">Active ({{ $activeJobsCount }})</a>
+            <a href="?status=draft" class="btn {{ $statusFilter === 'draft' ? 'btn-teal' : 'btn-ghost' }}" style="padding:6px 12px; font-size:11px; border-radius:8px;">Drafts ({{ $draftJobsCount }})</a>
+            <a href="?status=all" class="btn {{ $statusFilter === 'all' ? 'btn-teal' : 'btn-ghost' }}" style="padding:6px 12px; font-size:11px; border-radius:8px;">All</a>
+        </div>
+        <a href="{{ route('recruiter.export.jobs') }}" class="btn btn-ghost" style="font-size:12px;">Export</a>
+        <button class="btn btn-teal" style="font-size:12px;" onclick="openModal()">+ Post Job</button>
+      </div>
+    </div>
+
+    <div class="table-container">
       <div class="table-header">
-        <div class="th-cell">Job Title</div>
-        <div class="th-cell">Status</div>
-        <div class="th-cell">Posted</div>
-        <div class="th-cell">Applicants</div>
-        <div class="th-cell">Fill Rate</div>
-        <div class="th-cell">Actions</div>
+        <div>Job Title</div>
+        <div>Status</div>
+        <div>Posted</div>
+        <div>Applicants</div>
+        <div>Fill Rate</div>
+        <div>Actions</div>
       </div>
 
       @forelse($jobPostings as $job)
-      <div class="table-row tr-teal" onclick="filterByJob('{{ $job->title }}')">
-        <div class="job-title-cell">
-          <div class="job-logo" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8);">{{ substr($job->title, 0, 1) }}</div>
-          <div>
-            <div class="job-name">{{ $job->title }}</div>
-            <div class="job-dept">{{ $job->department ?? 'Engineering' }} · {{ $job->location ?? 'Remote' }} · {{ $job->salary ?? '$140K–$190K' }}</div>
+      @php
+        $fill = $job->fillRatePercent();
+        $colors = ['var(--teal)', 'var(--amber)', 'var(--violet)', 'var(--sky)'];
+        $color = $colors[$loop->index % 4];
+      @endphp
+      <div class="table-row">
+        <div class="job-cell">
+          <div class="job-logo" style="background:{{ $color }};">{{ substr($job->title, 0, 1) }}</div>
+          <div class="job-info">
+            <div class="name">{{ $job->title }}</div>
+            <div class="meta">{{ $job->department ?? 'General' }} · {{ $job->work_mode }} · {{ $job->salary ?? '$120K–$160K' }}</div>
           </div>
         </div>
-        <div><span class="status-badge s-active">● {{ ucfirst($job->status ?? 'active') }}</span></div>
-        <div><div class="cell-text">{{ $job->created_at->format('M d, Y') }}</div><div class="cell-sub">{{ $job->created_at->diffForHumans() }}</div></div>
-        <div><div class="cell-num">{{ $job->applications_count }}</div><div class="cell-sub">0 shortlisted</div></div>
-        <div class="prog-cell">
-          <div class="prog-row">
-            <div class="prog-bar"><div class="prog-fill" style="width:68%;background:var(--teal);"></div></div>
-            <span class="prog-val">68%</span>
-          </div>
+        <div>
+          <span class="status-badge {{ $job->status === 'active' ? 'active' : 'draft' }}">
+            ● {{ ucfirst($job->status) }}
+          </span>
         </div>
-        <div class="row-actions">
-          <button class="btn btn-outline-teal" style="font-size:11px;padding:5px 10px;" onclick="event.stopPropagation();showToast('Viewing applicants…')">View</button>
-          <button class="btn btn-ghost" style="font-size:11px;padding:5px 8px;" onclick="event.stopPropagation();">⋯</button>
+        <div>
+          <div class="posted-date">{{ $job->created_at->format('M d, Y') }}</div>
+          <div class="posted-ago">{{ $job->created_at->diffForHumans() }}</div>
+        </div>
+        <div>
+          <div class="applicants-count">{{ $job->applications_count }}</div>
+          <div class="shortlisted-sub">{{ $job->shortlisted_applications_count ?? 0 }} shortlisted</div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-track">
+            <div class="progress-fill" style="width:{{ $fill }}%; background:{{ $color }};"></div>
+          </div>
+          <span class="progress-val">{{ $fill }}%</span>
+        </div>
+        <div>
+          <a href="{{ route('jobs.show', $job->id) }}" class="btn btn-outline-teal" style="padding:6px 14px; font-size:12px;">View</a>
         </div>
       </div>
       @empty
-      <div style="padding: 40px; text-align: center; color: var(--text3);">
-        No job postings found. Click "Post New Job" to get started.
-      </div>
+      <div style="padding:40px; text-align:center; color:var(--text3);">No job postings found.</div>
       @endforelse
-
-    </div>
-  </div>
-
-  <!-- ── PIPELINE + SOURCES ── -->
-  <div class="pipeline-grid a2">
-
-    <!-- Applicant Funnel -->
-    <div class="card">
-      <div class="sh" style="margin-bottom:14px;">
-        <span class="sh-title">Hiring Funnel — All Roles</span>
-        <div class="sh-right">
-          <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;">This Month ▾</button>
-        </div>
-      </div>
-      <div class="funnel">
-
-        <div class="funnel-stage active-stage" onclick="setActiveStage(this)">
-          <div class="funnel-fill" style="width:100%;background:rgba(0,212,170,0.06);"></div>
-          <div class="stage-info">
-            <div class="stage-name">Total Applied</div>
-            <div class="stage-sub">All active roles combined</div>
-          </div>
-          <div class="stage-count">{{ $totalApplicants }}</div>
-          <div class="stage-pct" style="color:var(--teal);">100%</div>
-        </div>
-
-        <div class="funnel-stage" onclick="setActiveStage(this)">
-          <div class="funnel-fill" style="width:72%;background:rgba(56,189,248,0.05);"></div>
-          <div class="stage-info">
-            <div class="stage-name">Screened / Reviewed</div>
-            <div class="stage-sub">Passed initial ATS filter</div>
-          </div>
-          <div class="stage-count">0</div>
-          <div class="stage-pct" style="color:var(--sky);">0%</div>
-        </div>
-
-        <div class="funnel-stage" onclick="setActiveStage(this)">
-          <div class="funnel-fill" style="width:44%;background:rgba(251,191,36,0.05);"></div>
-          <div class="stage-info">
-            <div class="stage-name">Shortlisted</div>
-            <div class="stage-sub">Manually reviewed & approved</div>
-          </div>
-          <div class="stage-count">{{ $shortlistedCount }}</div>
-          <div class="stage-pct" style="color:var(--amber);">0%</div>
-        </div>
-
-      </div>
     </div>
 
-    <!-- Traffic Sources -->
-    <div class="card">
-      <div class="sh" style="margin-bottom:16px;">
-        <span class="sh-title">Top Sources</span>
-        <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;">Details →</button>
-      </div>
-      <div class="source-list">
-        <div class="source-item">
-          <div class="source-icon" style="background:var(--teal-d);">🌐</div>
-          <span class="source-name">JobFlow Platform</span>
-          <div class="source-bar"><div class="source-fill" style="width:90%;background:var(--teal);"></div></div>
-          <span class="source-count" style="color:var(--teal);">{{ $totalApplicants }}</span>
+    <!-- ── ANALYTICS ── -->
+    <div class="pipeline-grid">
+      <div class="card">
+        <div class="section-header" style="margin-top:0;">
+          <h2 class="section-title">Hiring Funnel — All Roles</h2>
+          <button class="btn btn-ghost" style="font-size:11px; padding:4px 10px;">This Month ▾</button>
         </div>
-      </div>
-
-      <!-- Divider -->
-      <div style="border-top:1px solid var(--border);margin:16px 0;"></div>
-
-      <!-- Time-to-hire -->
-      <div class="sh-title" style="margin-bottom:12px;">Avg. Time to Hire by Role</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:11px;color:var(--text2);width:110px;flex-shrink:0;">Full-Stack Eng.</span>
-          <div class="prog-bar" style="flex:1;height:5px;"><div class="prog-fill" style="width:60%;background:var(--teal);height:5px;border-radius:3px;"></div></div>
-          <span style="font-size:11px;font-weight:600;color:var(--teal);width:36px;text-align:right;">18d</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── APPLICANTS ── -->
-  <div class="applicants-section a3">
-    <div class="sh" style="margin-bottom:12px;">
-      <span class="sh-title">
-        Applicants
-        <span id="jobFilterLabel" style="font-size:12px;color:var(--teal);background:var(--teal-d);border:1px solid rgba(0,212,170,0.2);border-radius:5px;padding:2px 8px;margin-left:8px;font-weight:500;">Recent Applications</span>
-      </span>
-      <div class="sh-right">
-        <div class="filter-tabs" id="filterTabs">
-          <button class="filter-tab active" onclick="setFilter(this,'all')">All ({{ $totalApplicants }})</button>
-          <button class="filter-tab" onclick="setFilter(this,'shortlisted')">Shortlisted ({{ $shortlistedCount }})</button>
-        </div>
-        <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px;">Sort ↕</button>
-      </div>
-    </div>
-
-    <div class="applicants-grid" id="applicantsGrid">
-
-      @forelse($recentApplicants as $application)
-      <div class="applicant-card @if($application->status == 'shortlisted') shortlisted @endif" id="ac-{{ $application->id }}">
-        <div class="ac-top">
-          <div class="ac-info">
-            <div class="ac-avatar" style="background:linear-gradient(135deg,var(--teal),var(--sky));">
-              {{ substr($application->user->name, 0, 1) }}
-              <div class="ac-online"></div>
+        <div class="funnel">
+          <div class="funnel-item">
+            <div class="funnel-fill" style="width:100%; background:var(--teal);"></div>
+            <div class="funnel-info">
+              <div class="funnel-name">Total Applied</div>
+              <div style="font-size:11px; color:var(--text3);">All active roles combined</div>
             </div>
+            <div class="funnel-count">{{ $totalApplicants }}</div>
+            <div class="funnel-pct" style="color:var(--teal);">100%</div>
+          </div>
+          <div class="funnel-item">
+            <div class="funnel-fill" style="width:{{ $funnelScreenedPct }}%; background:var(--sky);"></div>
+            <div class="funnel-info">
+              <div class="funnel-name">Screened / Reviewed</div>
+              <div style="font-size:11px; color:var(--text3);">Passed initial ATS filter</div>
+            </div>
+            <div class="funnel-count">{{ $screenedCount }}</div>
+            <div class="funnel-pct" style="color:var(--sky);">{{ $funnelScreenedPct }}%</div>
+          </div>
+          <div class="funnel-item">
+            <div class="funnel-fill" style="width:{{ $funnelShortlistedPct }}%; background:var(--amber);"></div>
+            <div class="funnel-info">
+              <div class="funnel-name">Shortlisted</div>
+              <div style="font-size:11px; color:var(--text3);">Manually reviewed & approved</div>
+            </div>
+            <div class="funnel-count">{{ $shortlistedCount }}</div>
+            <div class="funnel-pct" style="color:var(--amber);">{{ $funnelShortlistedPct }}%</div>
+          </div>
+          <div class="funnel-item">
+            <div class="funnel-fill" style="width:{{ $funnelInterviewedPct }}%; background:var(--violet);"></div>
+            <div class="funnel-info">
+              <div class="funnel-name">Interviewed</div>
+              <div style="font-size:11px; color:var(--text3);">At least one round complete</div>
+            </div>
+            <div class="funnel-count">{{ $interviewsCount }}</div>
+            <div class="funnel-pct" style="color:var(--violet);">{{ $funnelInterviewedPct }}%</div>
+          </div>
+          <div class="funnel-item">
+            <div class="funnel-fill" style="width:{{ $funnelOfferPct }}%; background:var(--rose);"></div>
+            <div class="funnel-info">
+              <div class="funnel-name">Offers Extended</div>
+              <div style="font-size:11px; color:var(--text3);">Offer letter sent</div>
+            </div>
+            <div class="funnel-count">{{ $offersSentCount }}</div>
+            <div class="funnel-pct" style="color:var(--rose);">{{ $funnelOfferPct }}%</div>
+          </div>
+          <div class="funnel-item">
+            <div class="funnel-fill" style="width:{{ $funnelHiredPct }}%; background:var(--teal);"></div>
+            <div class="funnel-info">
+              <div class="funnel-name">Hired 🏆</div>
+              <div style="font-size:11px; color:var(--text3);">Offer accepted & onboarding</div>
+            </div>
+            <div class="funnel-count">{{ $hiredCount }}</div>
+            <div class="funnel-pct" style="color:var(--teal);">{{ $funnelHiredPct }}%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-header" style="margin-top:0;">
+          <h2 class="section-title">Top Sources</h2>
+          <button class="btn btn-ghost" style="font-size:11px; padding:4px 10px;">Details →</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="progress-wrap" style="flex-direction:column; align-items:flex-start; gap:6px;">
+            <div style="display:flex; justify-content:space-between; width:100%; font-size:12px; font-weight:600;">
+              <span>JobFlow Platform</span>
+              <span>98</span>
+            </div>
+            <div class="progress-track" style="width:100%;"><div class="progress-fill" style="width:98%; background:var(--teal);"></div></div>
+          </div>
+          <div class="progress-wrap" style="flex-direction:column; align-items:flex-start; gap:6px;">
+            <div style="display:flex; justify-content:space-between; width:100%; font-size:12px; font-weight:600;">
+              <span>LinkedIn</span>
+              <span>72</span>
+            </div>
+            <div class="progress-track" style="width:100%;"><div class="progress-fill" style="width:72%; background:var(--sky);"></div></div>
+          </div>
+          <div class="progress-wrap" style="flex-direction:column; align-items:flex-start; gap:6px;">
+            <div style="display:flex; justify-content:space-between; width:100%; font-size:12px; font-weight:600;">
+              <span>Indeed</span>
+              <span>54</span>
+            </div>
+            <div class="progress-track" style="width:100%;"><div class="progress-fill" style="width:54%; background:var(--amber);"></div></div>
+          </div>
+        </div>
+
+        <div style="margin-top:24px; padding-top:24px; border-top:1px solid var(--border);">
+            <div class="section-title" style="font-size:16px; margin-bottom:12px;">Avg. Time to Hire by Role</div>
+            @foreach($hireByRole as $row)
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                <span style="font-size:11px; color:var(--text3); width:100px;">{{ $row['label'] }}</span>
+                <div class="progress-track" style="flex:1;"><div class="progress-fill" style="width:{{ $row['pct'] }}%; background:var(--teal);"></div></div>
+                <span style="font-size:11px; font-weight:700; color:var(--teal);">{{ $row['days'] }}d</span>
+            </div>
+            @endforeach
+        </div>
+      </div>
+    </div>
+
+    <!-- ── APPLICANTS ── -->
+    <div class="section-header" id="section-applicants">
+      <h2 class="section-title">Applicants</h2>
+      <div style="display:flex; gap:10px;">
+        <div class="btn btn-ghost" style="padding:4px; gap:0;">
+            <button class="btn btn-ghost" style="border:none; background:transparent; font-size:11px; padding:6px 12px;">All ({{ $totalApplicants }})</button>
+            <button class="btn btn-ghost" style="border:none; background:transparent; font-size:11px; padding:6px 12px;">Shortlisted ({{ $shortlistedCount }})</button>
+        </div>
+        <button class="btn btn-ghost" style="font-size:11px; padding:6px 12px;">Sort ↕</button>
+      </div>
+    </div>
+
+    <div class="applicants-grid">
+      @forelse($recentApplicants as $application)
+      <div class="applicant-card">
+        <div class="ac-header">
+          <div class="ac-user">
+            <div class="ac-avatar">{{ substr($application->user->name, 0, 1) }}</div>
             <div>
               <div class="ac-name">{{ $application->user->name }}</div>
-              <div class="ac-role">{{ $application->jobPost->title }}</div>
+              <div class="ac-role">{{ Str::limit($application->jobPost->title, 20) }}</div>
             </div>
           </div>
           <div class="ac-actions">
-            <div class="ac-btn approve" onclick="shortlist('ac-{{ $application->id }}')" title="Shortlist">⭐</div>
-            <div class="ac-btn" onclick="showToast('Opening profile…')" title="View Profile">👤</div>
-            <div class="ac-btn reject" onclick="rejectCard('ac-{{ $application->id }}')" title="Reject">✕</div>
+            @if($application->status !== 'shortlisted')
+            <form method="POST" action="{{ route('recruiter.applications.status', $application) }}">
+              @csrf
+              <input type="hidden" name="status" value="shortlisted">
+              <button type="submit" class="ac-btn approve" title="Shortlist">⭐</button>
+            </form>
+            @endif
+            <a href="{{ route('recruiter.messages.start', ['user' => $application->user->id, 'job_id' => $application->job_post_id]) }}" class="ac-btn" style="text-decoration:none;">💬</a>
+            <button class="ac-btn reject">✕</button>
           </div>
         </div>
         <div class="ac-tags">
-          @foreach(json_decode($application->jobPost->skills ?? '[]') as $skill)
+          @foreach($application->jobPost->skillsList() as $skill)
           <span class="ac-tag">{{ $skill }}</span>
           @endforeach
         </div>
-        <div class="ac-match">
-          <span class="ac-match-lbl">Match</span>
-          <div class="ac-match-bar"><div class="ac-match-fill" style="width:{{ $application->jobPost->match }}%;"></div></div>
-          <span class="ac-match-pct">{{ $application->jobPost->match }}%</span>
+        <div class="ac-match-row">
+          <div class="ac-match-label">
+            <span>Match</span>
+            <span style="color:var(--teal);">{{ (int)$application->jobPost->match }}%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:{{ (int)$application->jobPost->match }}%; background:var(--teal);"></div></div>
         </div>
         <div class="ac-footer">
-          <span class="ac-exp">{{ $application->user->location ?? 'Remote' }}</span>
-          <span class="ac-stage-pill" style="color:var(--teal);background:var(--teal-d);border-color:rgba(0,212,170,0.25);">{{ ucfirst($application->status) }}</span>
+          <div class="ac-time">Applied {{ $application->created_at->diffForHumans() }}</div>
+          <span class="status-badge active" style="font-size:10px; padding:2px 8px;">{{ ucfirst($application->status) }}</span>
         </div>
       </div>
       @empty
-      <div style="grid-column: span 3; padding: 40px; text-align: center; color: var(--text3);">
-        No recent applications found.
-      </div>
+      <div style="grid-column: span 3; padding:40px; text-align:center; color:var(--text3);">No applicants found.</div>
       @endforelse
-
-    </div>
-  </div>
-
-</main>
-
-<!-- ═══════════════ POST JOB MODAL ═══════════════ -->
-<div class="modal-overlay" id="postModal" onclick="closeModalOutside(event)">
-  <div class="modal">
-    <div class="modal-title">
-      Post a New Job
-      <div class="modal-x" onclick="closeModal()">✕</div>
     </div>
 
-    <form action="{{ route('jobs.store') }}" method="POST" id="publishJobForm">
+  <!-- ── MODAL ── -->
+  <div class="modal-overlay" id="postModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Post a New Job</h2>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+
+      <form action="{{ route('jobs.store') }}" method="POST">
         @csrf
-        <div class="mf">
-          <label class="ml">Job Title</label>
-          <input class="mi" type="text" name="title" placeholder="e.g. Senior Backend Engineer" required>
+        <div class="form-group">
+          <label class="form-label">Job Title</label>
+          <input type="text" name="title" class="form-input @error('title') is-invalid @enderror" value="{{ old('title') }}" placeholder="e.g. Senior Backend Engineer" required>
+          @error('title') <div style="color:var(--rose); font-size:11px; margin-top:4px;">{{ $message }}</div> @enderror
         </div>
-        <div class="mf-row">
-          <div class="mf">
-            <label class="ml">Department</label>
-            <select class="mi" name="department">
-              <option>Engineering</option><option>Product</option><option>Design</option>
-              <option>Data / ML</option><option>DevOps</option><option>Marketing</option>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <select name="department" class="form-input">
+              <option>Engineering</option>
+              <option>Product</option>
+              <option>Design</option>
+              <option>Marketing</option>
             </select>
           </div>
-          <div class="mf">
-            <label class="ml">Work Mode</label>
-            <select class="mi" name="location">
-              <option>Remote</option><option>Hybrid</option><option>On-site</option>
+          <div class="form-group">
+            <label class="form-label">Work Mode</label>
+            <select name="work_mode" class="form-input">
+              <option>Remote</option>
+              <option>Hybrid</option>
+              <option>On-site</option>
             </select>
           </div>
         </div>
-        <div class="mf">
-          <label class="ml">Salary Range</label>
-          <input class="mi" type="text" name="salary" placeholder="$120,000 - $160,000">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div class="form-group">
+            <label class="form-label">Min Salary (USD)</label>
+            <input type="number" name="min_salary" class="form-input @error('min_salary') is-invalid @enderror" value="{{ old('min_salary') }}" placeholder="120000">
+            @error('min_salary') <div style="color:var(--rose); font-size:11px; margin-top:4px;">{{ $message }}</div> @enderror
+          </div>
+          <div class="form-group">
+            <label class="form-label">Max Salary (USD)</label>
+            <input type="number" name="max_salary" class="form-input @error('max_salary') is-invalid @enderror" value="{{ old('max_salary') }}" placeholder="160000">
+            @error('max_salary') <div style="color:var(--rose); font-size:11px; margin-top:4px;">{{ $message }}</div> @enderror
+          </div>
         </div>
-        <div class="mf">
-          <label class="ml">Job Description</label>
-          <textarea class="mi" name="description" rows="3" placeholder="Describe responsibilities…" style="resize:vertical;"></textarea>
+
+        <div class="form-group">
+          <label class="form-label">Experience Required</label>
+          <select name="experience" class="form-input">
+            <option>0-1 years (Junior)</option>
+            <option>2-3 years</option>
+            <option>4-6 years</option>
+            <option>7-10 years</option>
+            <option>10+ years</option>
+          </select>
         </div>
-        <div style="display:flex;gap:10px;margin-top:4px;">
-          <button type="button" class="btn btn-ghost" style="flex:1;justify-content:center;" onclick="closeModal()">Cancel</button>
-          <button type="submit" class="btn btn-teal" style="flex:1.5;justify-content:center;">
-            Publish Job ✦
-          </button>
+
+        <div class="form-group">
+          <label class="form-label">Skills (comma-separated)</label>
+          <input type="text" name="skills" class="form-input" placeholder="React, Node.js, TypeScript">
         </div>
-    </form>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-input @error('description') is-invalid @enderror" rows="4" placeholder="Describe the role...">{{ old('description') }}</textarea>
+          @error('description') <div style="color:var(--rose); font-size:11px; margin-top:4px;">{{ $message }}</div> @enderror
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1.5fr; gap:16px; margin-top:12px;">
+          <button type="submit" name="intent" value="draft" class="btn btn-ghost" style="justify-content:center;">Save as Draft</button>
+          <button type="submit" name="intent" value="publish" class="btn btn-teal" style="justify-content:center;">Publish Job ✦</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
+@endsection
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
+@section('scripts')
 <script>
-  // ── STAT COUNTERS ──
-  document.querySelectorAll('.stat-val[data-target]').forEach(el => {
-    const target = +el.dataset.target;
-    let current = 0;
-    const step = Math.max(1, Math.ceil(target / 45));
-    const timer = setInterval(() => {
-      current = Math.min(current + step, target);
-      el.textContent = current;
-      if (current >= target) clearInterval(timer);
-    }, 28);
+  function openModal() {
+    document.getElementById('postModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  
+  @if($errors->any())
+    openModal();
+  @endif
+
+  @if(session('success'))
+    // You could add a toast notification here
+  @endif
+  function closeModal() {
+    document.getElementById('postModal').classList.remove('open');
+    document.body.style.overflow = 'auto';
+  }
+
+  // Handle clicking outside modal to close
+  document.getElementById('postModal').addEventListener('click', (e) => {
+    if (e.target.id === 'postModal') closeModal();
   });
 
-  // ── MODAL ──
-  function openModal() { document.getElementById('postModal').classList.add('open'); }
-  function closeModal() { document.getElementById('postModal').classList.remove('open'); }
-  function closeModalOutside(e) { if (e.target === document.getElementById('postModal')) closeModal(); }
-
-  // ── TOAST ──
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.style.opacity = '1';
-    t.style.transform = 'translateX(-50%) translateY(0)';
-    clearTimeout(t._timer);
-    t._timer = setTimeout(() => {
-      t.style.opacity = '0';
-      t.style.transform = 'translateX(-50%) translateY(10px)';
-    }, 2400);
-  }
+  // Simple number count animation
+  document.querySelectorAll('.stat-value').forEach(el => {
+    const target = parseInt(el.dataset.target);
+    if (isNaN(target)) return;
+    let current = 0;
+    const increment = Math.max(1, Math.ceil(target / 50));
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        el.textContent = target;
+        clearInterval(timer);
+      } else {
+        el.textContent = current;
+      }
+    }, 20);
+  });
 </script>
-</body>
-</html>
+@endsection

@@ -6,24 +6,29 @@
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
 
-    <form action="#" method="POST">
+    <form method="POST" action="{{ route('applications.quick-add') }}">
         @csrf
+        @if ($errors->any())
+        <div style="font-size:12px;color:var(--red);margin-bottom:12px;line-height:1.5;">
+          {{ $errors->first() }}
+        </div>
+        @endif
         <div class="modal-field">
           <label class="modal-label">Company Name</label>
-          <input type="text" name="company" class="modal-input" placeholder="e.g. Google, Stripe, Figma...">
+          <input type="text" name="company" value="{{ old('company') }}" class="modal-input" placeholder="e.g. Google, Stripe, Figma..." required>
         </div>
         <div class="modal-field">
           <label class="modal-label">Job Title</label>
-          <input type="text" name="title" class="modal-input" placeholder="e.g. Senior Software Engineer">
+          <input type="text" name="title" value="{{ old('title') }}" class="modal-input" placeholder="e.g. Senior Software Engineer" required>
         </div>
         <div class="modal-field">
           <label class="modal-label">Stage</label>
           <select name="status" class="modal-input modal-select">
-            <option value="applied">Applied</option>
-            <option value="review">Under Review</option>
-            <option value="interview">Interview</option>
-            <option value="offer">Offer</option>
-            <option value="rejected">Rejected</option>
+            <option value="applied" @selected(old('status', 'applied') === 'applied')>Applied</option>
+            <option value="review" @selected(old('status') === 'review')>Under Review</option>
+            <option value="interview" @selected(old('status') === 'interview')>Interview</option>
+            <option value="offer" @selected(old('status') === 'offer')>Offer</option>
+            <option value="rejected" @selected(old('status') === 'rejected')>Rejected</option>
           </select>
         </div>
         <div class="modal-field">

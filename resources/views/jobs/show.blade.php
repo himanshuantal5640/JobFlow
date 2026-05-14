@@ -78,7 +78,7 @@
         </div>
         <div class="match-details-content">
           <div class="match-verdict-details">Excellent Fit ✦</div>
-          <div class="match-desc-details">Your profile is a strong match for this position. Your skills in <strong>{{ implode(', ', array_slice(json_decode($job->skills ?? '[]'), 0, 3)) }}</strong> align perfectly with the requirements.</div>
+          <div class="match-desc-details">Your profile is a strong match for this position. Your skills in <strong>{{ implode(', ', array_slice($job->skillsList(), 0, 3)) }}</strong> align perfectly with the requirements.</div>
         </div>
       </div>
     </div>
@@ -141,7 +141,7 @@
         Required Tech Stack
       </div>
       <div class="tech-chips-details">
-        @foreach(json_decode($job->skills ?? '[]') as $skill)
+        @foreach($job->skillsList() as $skill)
             <div class="tech-chip-details">
                 <div class="tc-dot" style="background: var(--primary);"></div>
                 {{ $skill }}
@@ -466,10 +466,15 @@
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            }
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('Request failed');
+            return res.json();
+        })
         .then(data => {
             if(data.success) {
                 ['step1content','step2content','step3content'].forEach(id => {
@@ -478,7 +483,8 @@
                 document.getElementById('successContent').style.display = 'block';
                 document.getElementById('modalSteps').style.display = 'none';
             }
-        });
+        })
+        .catch(() => { alert('Could not submit application. Please try again.'); });
     }
 
     /* ── KEYBOARD: ESC closes modal ── */

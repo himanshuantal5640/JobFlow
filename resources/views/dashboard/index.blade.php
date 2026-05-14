@@ -275,8 +275,6 @@
     </div>
   </div>
 
-  @include('dashboard.partials.add-modal')
-
 @endsection
 
 @section('scripts')
@@ -308,8 +306,6 @@
     window.showToast('Moved to ' + targetCol);
   }
 
-  function openAddModal() { document.getElementById('addModal').classList.add('open'); }
-  function closeModal() { document.getElementById('addModal').classList.remove('open'); }
   function toggleSave(btn) { btn.classList.toggle('saved'); window.showToast('Saved'); }
 
   // Countdown timer logic... (omitted for brevity, but same as provided)
