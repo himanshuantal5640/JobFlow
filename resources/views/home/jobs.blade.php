@@ -25,7 +25,7 @@
         </div>
         
         <div class="job-tags">
-          @foreach(array_slice(json_decode($job->skills ?? '[]', true) ?: [], 0, 8) as $skill)
+          @foreach(array_slice($job->skillsList(), 0, 8) as $skill)
           <span class="tag">{{ $skill }}</span>
           @endforeach
         </div>

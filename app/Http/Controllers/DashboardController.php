@@ -18,7 +18,7 @@ class DashboardController extends Controller
         }
 
         $applications = Application::where('user_id', Auth::id())->with('jobPost')->latest()->get();
-        $recommendedJobs = JobPost::where('status', 'active')->latest()->take(6)->get();
+        $recommendedJobs = JobPost::where('status', 'active')->latest()->take(12)->get();
         
         $messagesCount = Message::whereHas('conversation', function ($q) {
             $q->where('user_one_id', Auth::id())->orWhere('user_two_id', Auth::id());
@@ -35,16 +35,19 @@ class DashboardController extends Controller
 
         $recruiterId = Auth::id();
         $search = trim((string) $request->get('q', ''));
-        $statusFilter = $request->get('status', 'active');
-        if (! in_array($statusFilter, ['active', 'draft', 'all'], true)) {
-            $statusFilter = 'active';
-        }
-
         $jobScope = JobPost::query()->where('recruiter_id', $recruiterId);
 
         $activeJobsCount = (clone $jobScope)->where('status', 'active')->count();
         $draftJobsCount = (clone $jobScope)->where('status', 'draft')->count();
         $totalMyJobs = $activeJobsCount + $draftJobsCount;
+
+        $statusFilter = $request->get('status');
+        if (!$statusFilter) {
+            $statusFilter = $activeJobsCount === 0 && $draftJobsCount > 0 ? 'all' : 'active';
+        }
+        if (! in_array($statusFilter, ['active', 'draft', 'all'], true)) {
+            $statusFilter = 'active';
+        }
 
         $applicationsBase = Application::query()->whereHas('jobPost', function ($query) use ($recruiterId) {
             $query->where('recruiter_id', $recruiterId);

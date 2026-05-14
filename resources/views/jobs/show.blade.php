@@ -187,13 +187,19 @@
         <div class="db-text">Closing soon! Apply today.</div>
       </div>
 
-      <button type="button" class="apply-btn-lg-details" onclick="openApply()">
-        Quick Apply ✦
-      </button>
+      @if(auth()->user()->role !== 'recruiter')
+        <button type="button" class="apply-btn-lg-details" onclick="openApply()">
+          Quick Apply ✦
+        </button>
 
-      <button class="btn btn-ghost" style="width:100%; justify-content:center;" onclick="toggleSave()">
-          ★ Save Job
-      </button>
+        <button class="btn btn-ghost" style="width:100%; justify-content:center;" onclick="toggleSave()">
+            ★ Save Job
+        </button>
+      @else
+        <div style="background:var(--surface2); padding:16px; border-radius:12px; text-align:center; color:var(--text3); font-size:13px;">
+          You are viewing this as a recruiter.
+        </div>
+      @endif
     </div>
 
     <!-- COMPANY QUICK CARD -->
@@ -228,7 +234,11 @@
     </div>
   </div>
   <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-    <button type="button" class="btn btn-primary" style="font-size:13px; padding:9px 22px;" onclick="openApply()">Apply Now ✦</button>
+    @if(auth()->user()->role !== 'recruiter')
+      <button type="button" class="btn btn-primary" style="font-size:13px; padding:9px 22px;" onclick="openApply()">Apply Now ✦</button>
+    @else
+      <span style="font-size:12px; color:var(--text3);">Recruiter View</span>
+    @endif
   </div>
 </div>
 

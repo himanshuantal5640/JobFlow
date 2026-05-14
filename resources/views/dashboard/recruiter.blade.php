@@ -119,8 +119,14 @@
           </div>
           <span class="progress-val">{{ $fill }}%</span>
         </div>
-        <div>
+        <div style="display:flex; gap:8px;">
           <a href="{{ route('jobs.show', $job->id) }}" class="btn btn-outline-teal" style="padding:6px 14px; font-size:12px;">View</a>
+          @if($job->status === 'draft')
+            <form action="{{ route('jobs.publish', $job->id) }}" method="POST" style="display:inline;">
+              @csrf
+              <button type="submit" class="btn btn-teal" style="padding:6px 14px; font-size:12px;">Publish</button>
+            </form>
+          @endif
         </div>
       </div>
       @empty
@@ -259,15 +265,31 @@
             </div>
           </div>
           <div class="ac-actions">
-            @if($application->status !== 'shortlisted')
-            <form method="POST" action="{{ route('recruiter.applications.status', $application) }}">
-              @csrf
-              <input type="hidden" name="status" value="shortlisted">
-              <button type="submit" class="ac-btn approve" title="Shortlist">⭐</button>
-            </form>
+            @if($application->status === 'applied')
+              <form method="POST" action="{{ route('recruiter.applications.status', $application) }}" style="display:inline;">
+                @csrf
+                <input type="hidden" name="status" value="shortlisted">
+                <button type="submit" class="ac-btn approve" title="Shortlist">⭐</button>
+              </form>
             @endif
+
+            @if($application->status !== 'interview' && $application->status !== 'rejected')
+              <form method="POST" action="{{ route('recruiter.applications.status', $application) }}" style="display:inline;">
+                @csrf
+                <input type="hidden" name="status" value="interview">
+                <button type="submit" class="ac-btn approve" title="Schedule Interview" style="color:var(--amber);">🗓</button>
+              </form>
+            @endif
+
             <a href="{{ route('recruiter.messages.start', ['user' => $application->user->id, 'job_id' => $application->job_post_id]) }}" class="ac-btn" style="text-decoration:none;">💬</a>
-            <button class="ac-btn reject">✕</button>
+
+            @if($application->status !== 'rejected')
+              <form method="POST" action="{{ route('recruiter.applications.status', $application) }}" style="display:inline;">
+                @csrf
+                <input type="hidden" name="status" value="rejected">
+                <button type="submit" class="ac-btn reject" title="Reject">✕</button>
+              </form>
+            @endif
           </div>
         </div>
         <div class="ac-tags">

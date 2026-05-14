@@ -551,13 +551,19 @@
 .mf { margin-bottom: 14px; }
 .ml { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 5px; display: block; }
 .mi {
-  width: 100%; background: var(--surface2); border: 1.5px solid var(--border);
+  width: 100%; background: #1a1d2e; border: 1.5px solid var(--border);
   border-radius: var(--r); padding: 10px 12px;
   font-family: 'Manrope', sans-serif; font-size: 13px;
-  color: var(--text); outline: none; transition: border-color var(--t); appearance: none;
+  color: #ffffff; outline: none; transition: all var(--t);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23818DB8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
 }
-.mi:focus { border-color: var(--v2); box-shadow: 0 0 0 3px rgba(124,58,237,0.12); }
-.mi::placeholder { color: var(--text3); }
+.mi:focus { border-color: var(--v2); box-shadow: 0 0 0 3px rgba(124,58,237,0.2); background-color: #23273f; }
+.mi::placeholder { color: var(--text3-details); }
+.mi option { background: #1a1d2e; color: #ffffff; padding: 10px; }
 
 .upload-box {
   border: 1.5px dashed var(--border2); border-radius: var(--r);

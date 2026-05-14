@@ -91,4 +91,15 @@ class JobController extends Controller
 
         return back()->with('success', $message);
     }
+
+    public function publish(JobPost $job)
+    {
+        if ($job->recruiter_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $job->update(['status' => 'active']);
+
+        return back()->with('success', 'Job published successfully!');
+    }
 }

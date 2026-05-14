@@ -55,7 +55,7 @@ class JobListingController extends Controller
         }
 
         // Sorting
-        $sort = $request->get('sort', 'match');
+        $sort = $request->get('sort', 'recent');
         if ($sort === 'recent') {
             $query->latest();
         } elseif ($sort === 'salary_h') {
@@ -77,7 +77,11 @@ class JobListingController extends Controller
             ->groupBy('company')
             ->get();
 
-        return view('jobs.index', compact('jobs', 'companies'));
+        $resumes = Auth::check() 
+            ? \App\Models\Resume::where('user_id', Auth::id())->latest()->get()
+            : collect([]);
+
+        return view('jobs.index', compact('jobs', 'companies', 'resumes'));
     }
 
     public function show($id)

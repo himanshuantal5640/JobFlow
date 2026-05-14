@@ -56,6 +56,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Job Management (Recruiter)
     Route::post('/jobs-store', [JobController::class, 'store'])->name('jobs.store');
+    Route::post('/jobs/{job}/publish', [JobController::class, 'publish'])->name('jobs.publish');
 
     // Tools
     Route::get('/resume-analyzer', [ResumeAnalyzerController::class, 'index'])->name('seeker.analyzer');
