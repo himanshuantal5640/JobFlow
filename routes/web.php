@@ -61,6 +61,9 @@ Route::middleware(['auth'])->group(function () {
     // Tools
     Route::get('/resume-analyzer', [ResumeAnalyzerController::class, 'index'])->name('seeker.analyzer');
     Route::post('/resume-analyzer', [ResumeAnalyzerController::class, 'store'])->name('seeker.analyzer.store');
+    Route::get('/applications', [SeekerController::class, 'applications'])->name('applications.index');
+    Route::get('/applications/{application}/offer', [SeekerController::class, 'showOffer'])->name('applications.offer');
+    Route::post('/applications/{application}/offer/decision', [SeekerController::class, 'offerDecision'])->name('applications.offer.decision');
     Route::get('/seeker/interviews', [SeekerController::class, 'interviews'])->name('seeker.interviews');
     Route::get('/seeker/profile', [SeekerController::class, 'profile'])->name('seeker.profile');
     Route::post('/seeker/profile', [SeekerController::class, 'updateProfile'])->name('seeker.profile.update');

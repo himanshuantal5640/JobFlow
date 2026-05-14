@@ -79,9 +79,33 @@ class RecruiterController extends Controller
 
         $validated = $request->validate([
             'status' => 'required|in:applied,shortlisted,interview,offer,rejected,hired',
+            'interview_date' => 'nullable|date',
+            'interview_link' => 'nullable|url',
+            'offer_salary' => 'nullable|string',
+            'offer_start_date' => 'nullable|date',
+            'offer_letter' => 'nullable|file|mimes:pdf|max:5120',
         ]);
 
-        $application->update(['status' => $validated['status']]);
+        $data = ['status' => $validated['status']];
+
+        if ($validated['status'] === 'interview') {
+            $data['interview_details'] = [
+                'date' => $validated['interview_date'],
+                'link' => $validated['interview_link'],
+            ];
+        }
+
+        if ($validated['status'] === 'offer') {
+            $data['offer_details'] = [
+                'salary' => $validated['offer_salary'],
+                'start_date' => $validated['offer_start_date'],
+            ];
+            if ($request->hasFile('offer_letter')) {
+                $data['offer_letter_path'] = $request->file('offer_letter')->store('offers', 'public');
+            }
+        }
+
+        $application->update($data);
 
         return back()->with('success', 'Application status updated.');
     }

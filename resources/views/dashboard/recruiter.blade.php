@@ -273,12 +273,12 @@
               </form>
             @endif
 
-            @if($application->status !== 'interview' && $application->status !== 'rejected')
-              <form method="POST" action="{{ route('recruiter.applications.status', $application) }}" style="display:inline;">
-                @csrf
-                <input type="hidden" name="status" value="interview">
-                <button type="submit" class="ac-btn approve" title="Schedule Interview" style="color:var(--amber);">🗓</button>
-              </form>
+            @if($application->status !== 'interview' && $application->status !== 'rejected' && $application->status !== 'offer')
+              <button type="button" class="ac-btn approve" title="Schedule Interview" style="color:var(--amber);" onclick="openInterviewModal({{ $application->id }}, '{{ $application->user->name }}')">🗓</button>
+            @endif
+
+            @if($application->status === 'shortlisted' || $application->status === 'interview')
+               <button type="button" class="ac-btn approve" title="Send Offer" style="color:var(--violet);" onclick="openOfferModal({{ $application->id }}, '{{ $application->user->name }}')">📜</button>
             @endif
 
             <a href="{{ route('recruiter.messages.start', ['user' => $application->user->id, 'job_id' => $application->job_post_id]) }}" class="ac-btn" style="text-decoration:none;">💬</a>
@@ -352,12 +352,12 @@
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
           <div class="form-group">
-            <label class="form-label">Min Salary (USD)</label>
+            <label class="form-label">Min Salary (₹)</label>
             <input type="number" name="min_salary" class="form-input @error('min_salary') is-invalid @enderror" value="{{ old('min_salary') }}" placeholder="120000">
             @error('min_salary') <div style="color:var(--rose); font-size:11px; margin-top:4px;">{{ $message }}</div> @enderror
           </div>
           <div class="form-group">
-            <label class="form-label">Max Salary (USD)</label>
+            <label class="form-label">Max Salary (₹)</label>
             <input type="number" name="max_salary" class="form-input @error('max_salary') is-invalid @enderror" value="{{ old('max_salary') }}" placeholder="160000">
             @error('max_salary') <div style="color:var(--rose); font-size:11px; margin-top:4px;">{{ $message }}</div> @enderror
           </div>
@@ -392,6 +392,62 @@
       </form>
     </div>
   </div>
+  <!-- ── INTERVIEW MODAL ── -->
+  <div class="modal-overlay" id="interviewModal">
+    <div class="modal" style="width:400px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Schedule Interview</h2>
+        <button class="modal-close" onclick="closeInterviewModal()">✕</button>
+      </div>
+      <form id="interviewForm" method="POST" action="">
+        @csrf
+        <input type="hidden" name="status" value="interview">
+        <div class="form-group">
+          <label class="form-label">Candidate: <strong id="interviewCandidateName"></strong></label>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date & Time</label>
+          <input type="datetime-local" name="interview_date" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Meeting Link (Zoom/Meet)</label>
+          <input type="url" name="interview_link" class="form-input" placeholder="https://meet.google.com/..." required>
+        </div>
+        <button type="submit" class="btn btn-teal" style="width:100%; justify-content:center;">Confirm & Schedule 🗓</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── OFFER MODAL ── -->
+  <div class="modal-overlay" id="offerModal">
+    <div class="modal" style="width:400px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Send Job Offer</h2>
+        <button class="modal-close" onclick="closeOfferModal()">✕</button>
+      </div>
+      <form id="offerForm" method="POST" action="" enctype="multipart/form-data">
+        @csrf
+        <input type="hidden" name="status" value="offer">
+        <div class="form-group">
+          <label class="form-label">Candidate: <strong id="offerCandidateName"></strong></label>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Offered Salary (Annual)</label>
+          <input type="text" name="offer_salary" class="form-input" placeholder="e.g. ₹12,00,000" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Joining Date</label>
+          <input type="date" name="offer_start_date" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Offer Letter (PDF)</label>
+          <input type="file" name="offer_letter" class="form-input" accept=".pdf">
+        </div>
+        <button type="submit" class="btn btn-teal" style="width:100%; justify-content:center; background:var(--violet);">Send Official Offer ✦</button>
+      </form>
+    </div>
+  </div>
+
 @endsection
 
 @section('scripts')
@@ -401,21 +457,43 @@
     document.body.style.overflow = 'hidden';
   }
   
+  function openInterviewModal(appId, name) {
+    document.getElementById('interviewCandidateName').textContent = name;
+    document.getElementById('interviewForm').action = `/recruiter/applications/${appId}/status`;
+    document.getElementById('interviewModal').classList.add('open');
+  }
+
+  function closeInterviewModal() {
+    document.getElementById('interviewModal').classList.remove('open');
+  }
+
+  function openOfferModal(appId, name) {
+    document.getElementById('offerCandidateName').textContent = name;
+    document.getElementById('offerForm').action = `/recruiter/applications/${appId}/status`;
+    document.getElementById('offerModal').classList.add('open');
+  }
+
+  function closeOfferModal() {
+    document.getElementById('offerModal').classList.remove('open');
+  }
+
   @if($errors->any())
     openModal();
   @endif
 
-  @if(session('success'))
-    // You could add a toast notification here
-  @endif
   function closeModal() {
     document.getElementById('postModal').classList.remove('open');
     document.body.style.overflow = 'auto';
   }
 
   // Handle clicking outside modal to close
-  document.getElementById('postModal').addEventListener('click', (e) => {
-    if (e.target.id === 'postModal') closeModal();
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-overlay')) {
+        overlay.classList.remove('open');
+        document.body.style.overflow = 'auto';
+      }
+    });
   });
 
   // Simple number count animation

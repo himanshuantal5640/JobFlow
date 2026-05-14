@@ -8,6 +8,49 @@ use Illuminate\Support\Facades\Auth;
 
 class SeekerController extends Controller
 {
+    public function applications()
+    {
+        $user = Auth::user();
+        $applications = Application::where('user_id', $user->id)
+            ->with('jobPost')
+            ->latest()
+            ->get();
+
+        return view('seeker.applications', compact('applications'));
+    }
+
+    public function showOffer(Application $application)
+    {
+        if ($application->user_id !== Auth::id() || $application->status !== 'offer') {
+            abort(403);
+        }
+        return view('seeker.offer', compact('application'));
+    }
+
+    public function offerDecision(Request $request, Application $application)
+    {
+        if ($application->user_id !== Auth::id() || $application->status !== 'offer') {
+            abort(403);
+        }
+
+        $request->validate([
+            'decision' => 'required|in:accepted,rejected',
+            'reason' => 'nullable|string|max:500'
+        ]);
+        
+        $status = $request->decision === 'accepted' ? 'hired' : 'rejected';
+        $updateData = ['status' => $status];
+        
+        if ($request->decision === 'rejected') {
+            $updateData['rejection_reason'] = $request->reason;
+        }
+
+        $application->update($updateData);
+
+        $msg = $request->decision === 'accepted' ? 'Congratulations! You have accepted the offer.' : 'You have declined the offer.';
+        return redirect()->route('dashboard')->with('success', $msg);
+    }
+
     public function interviews()
     {
         $user = Auth::user();

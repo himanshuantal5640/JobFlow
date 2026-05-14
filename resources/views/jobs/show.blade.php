@@ -48,7 +48,7 @@
       <div class="hero-meta-details">
         <span class="meta-pill-details">💼 {{ $job->job_type ?? 'Full-time' }}</span>
         <span class="meta-pill-details">🌍 {{ $job->location ?? 'Remote' }}</span>
-        <span class="meta-pill-details">💰 {{ $job->salary ?? '$100K - $150K' }}</span>
+        <span class="meta-pill-details">💰 {{ $job->salary ?? '₹10 LPA - ₹15 LPA' }}</span>
         <span class="meta-pill-details">📈 {{ $job->experience ?? '3-5 yrs' }} experience</span>
         <span class="meta-pill-details">🏢 {{ $job->department ?? 'Engineering' }}</span>
         <span class="meta-pill-details">📅 Posted {{ $job->created_at->diffForHumans() }}</span>
@@ -173,7 +173,7 @@
 
     <!-- APPLY CARD -->
     <div class="apply-card-details">
-      <div class="apply-salary-details">{{ explode('–', $job->salary ?? '$100K–$150K')[0] }}</div>
+      <div class="apply-salary-details">{{ explode('–', $job->salary ?? '₹10 LPA–₹15 LPA')[0] }}</div>
       <div class="apply-salary-sub-details">per year · starting range</div>
 
       <div class="apply-meta-row-details">
@@ -314,8 +314,8 @@
         </div>
       </div>
       <div class="mf">
-        <label class="ml">Expected Salary (USD)</label>
-        <input class="mi" type="text" value="$185,000" placeholder="e.g. $175,000">
+        <label class="ml">Expected Salary (₹)</label>
+        <input class="mi" type="text" value="₹12.5 LPA" placeholder="e.g. ₹15 LPA">
       </div>
       <div class="mf">
         <label class="ml">Notice Period</label>
@@ -360,7 +360,7 @@
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--text2);">
           <div>📄 <strong style="color:var(--text);">Resume:</strong> v3 (ATS 94%)</div>
-          <div>💰 <strong style="color:var(--text);">Expected:</strong> $185K</div>
+          <div>💰 <strong style="color:var(--text);">Expected:</strong> ₹12 LPA</div>
           <div>📅 <strong style="color:var(--text);">Notice:</strong> 4 weeks</div>
           <div>🌍 <strong style="color:var(--text);">Visa needed:</strong> Yes</div>
         </div>

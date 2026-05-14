@@ -149,7 +149,7 @@
                         </div>
                         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
                             <span class="jc-tag">📍 ${job.location}</span>
-                            <span class="jc-tag">💰 ${job.salary}</span>
+                             <span class="jc-tag">💰 ₹${job.salary}</span>
                             <span class="jc-tag">⏱ ${job.job_type || 'Full-time'}</span>
                         </div>
                     </div>
@@ -245,7 +245,7 @@
         <div><label class="ml">LinkedIn Profile</label><input class="mi" type="url" value="linkedin.com/in/you"></div>
         <div><label class="ml">Portfolio / GitHub</label><input class="mi" type="url" value="github.com/you"></div>
       </div>
-      <div class="mf"><label class="ml">Expected Salary</label><input class="mi" type="text" value="${job.salary || '$150,000'}"></div>
+      <div class="mf"><label class="ml">Expected Salary</label><input class="mi" type="text" value="₹${job.salary || '15 LPA'}"></div>
       <div class="mf">
         <label class="ml">Notice Period</label>
         <select class="mi"><option>2 weeks</option><option selected>4 weeks</option></select>
@@ -263,7 +263,7 @@
           <div><div style="font-weight:700;">${userName}</div><div style="font-size:12px;color:var(--text3);">${userEmail}</div></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
-          <div>📄 <strong>Resume:</strong> v3</div><div>💰 <strong>Expected:</strong> ${job.salary || '$150K'}</div>
+          <div>📄 <strong>Resume:</strong> v3</div><div>💰 <strong>Expected:</strong> ₹${job.salary || '15 LPA'}</div>
         </div>
       </div>
       <div class="modal-footer">

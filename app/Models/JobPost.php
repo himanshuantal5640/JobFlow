@@ -74,9 +74,9 @@ class JobPost extends Model
 
     public static function formatSalaryRange(int $min, int $max): string
     {
-        $fmt = fn (int $n) => '$'.round($n / 1000).'K';
+        $fmt = fn (int $n) => '₹' . ($n / 100000) . ' LPA';
 
-        return $fmt($min).'–'.$fmt($max);
+        return $fmt($min) . ' – ' . $fmt($max);
     }
 
     /**

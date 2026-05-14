@@ -52,7 +52,7 @@
       <div class="stat-label">Interviews</div>
       <div class="stat-trend trend-up">↑ Scheduled</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" onclick="window.location.href='{{ route('applications.index') }}'" style="cursor:pointer;">
       <div class="stat-icon" style="background:rgba(167, 139, 250, 0.1); color:var(--violet);">🎉</div>
       <div class="stat-value" style="color:var(--violet);" data-target="{{ $applications->where('status', 'offer')->count() }}">0</div>
       <div class="stat-label">Offers Received</div>
@@ -83,6 +83,7 @@
             'shortlisted' => ['title' => 'Shortlisted', 'color' => 'var(--sky)'],
             'interview' => ['title' => 'Interview', 'color' => 'var(--amber)'],
             'offer' => ['title' => 'Offer', 'color' => 'var(--violet)'],
+            'hired' => ['title' => 'Selected', 'color' => '#10b981'],
             'rejected' => ['title' => 'Rejected', 'color' => 'var(--rose)'],
         ];
       @endphp
@@ -99,10 +100,11 @@
         <div class="col-cards">
           @foreach($applications->where('status', $status) as $app)
           @php
+            $cardUrl = ($status === 'offer') ? route('applications.offer', $app) : route('jobs.show', $app->jobPost->id);
             $colors = ['var(--teal)', 'var(--sky)', 'var(--violet)', 'var(--amber)'];
             $color = $colors[$loop->index % 4];
           @endphp
-          <div class="k-card" onclick="window.location.href='{{ route('jobs.show', $app->jobPost->id) }}'" style="cursor:pointer; position:relative;">
+          <div class="k-card" onclick="window.location.href='{{ $cardUrl }}'" style="cursor:pointer; position:relative;">
             <div style="position:absolute; top:0; left:0; width:4px; bottom:0; border-radius:12px 0 0 12px; background:{{ $data['color'] }};"></div>
             <div class="kc-top">
               <div class="kc-company">
@@ -111,6 +113,31 @@
               </div>
             </div>
             <div class="kc-title">{{ $app->jobPost->title }}</div>
+            
+            @if($status === 'interview' && $app->interview_details)
+              <div style="background:var(--amber-d); border:1px solid rgba(251,191,36,0.2); border-radius:10px; padding:10px; margin:8px 0; font-size:11px;">
+                <div style="color:var(--amber); font-weight:700; margin-bottom:4px;">🗓 Upcoming Interview</div>
+                <div style="color:var(--text2);">{{ \Carbon\Carbon::parse($app->interview_details['date'] ?? '')->format('M d, g:i A') }}</div>
+                @if($app->interview_details['link'] ?? false)
+                  <a href="{{ $app->interview_details['link'] }}" target="_blank" onclick="event.stopPropagation()" style="color:var(--sky); text-decoration:none; display:block; margin-top:4px;">Join Meeting →</a>
+                @endif
+              </div>
+            @endif
+
+            @if($status === 'offer' && $app->offer_details)
+              <div style="background:var(--violet-d); border:1px solid rgba(167,139,250,0.2); border-radius:10px; padding:10px; margin:8px 0; font-size:11px;">
+                <div style="color:var(--violet); font-weight:700; margin-bottom:4px;">🎉 Job Offer</div>
+                <div style="color:var(--text2);">Salary: <strong>{{ $app->offer_details['salary'] ?? 'N/A' }}</strong></div>
+                <div style="color:var(--text2);">Starts: <strong>{{ \Carbon\Carbon::parse($app->offer_details['start_date'] ?? '')->format('M d, Y') }}</strong></div>
+                <div style="margin-top:8px; display:flex; gap:6px;">
+                  @if($app->offer_letter_path)
+                    <a href="{{ Storage::url($app->offer_letter_path) }}" target="_blank" onclick="event.stopPropagation()" class="btn btn-teal" style="flex:1; padding:6px; font-size:10px; justify-content:center;">Letter 📄</a>
+                  @endif
+                  <a href="{{ route('applications.offer', $app) }}" onclick="event.stopPropagation()" class="btn btn-teal" style="background:var(--violet); font-size:14px; padding:12px 20px; display:inline-flex; flex:1; justify-content:center;">Review Offer ✦</a>
+                </div>
+              </div>
+            @endif
+
             <div class="kc-tags">
               @foreach($app->jobPost->skillsList() as $skill)
                 <span class="kc-tag">{{ $skill }}</span>

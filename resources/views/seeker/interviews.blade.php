@@ -43,11 +43,15 @@
             <div class="ic-info">
                 <div class="ic-info-item">
                     <span>📅</span>
-                    <span>Scheduled for <strong>{{ now()->addDays(2)->format('M d, Y') }} at 10:00 AM</strong></span>
+                    <span>Scheduled for <strong>{{ \Carbon\Carbon::parse($interview->interview_details['date'] ?? '')->format('M d, Y \a\t g:i A') }}</strong></span>
                 </div>
                 <div class="ic-info-item">
                     <span>🎥</span>
-                    <span>Video Call · Link will be sent via email</span>
+                    @if($interview->interview_details['link'] ?? false)
+                        <span>Video Call · <a href="{{ $interview->interview_details['link'] }}" target="_blank" style="color:var(--teal); text-decoration:none;">Join Link →</a></span>
+                    @else
+                        <span>Meeting details pending</span>
+                    @endif
                 </div>
             </div>
 

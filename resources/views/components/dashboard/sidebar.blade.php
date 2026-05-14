@@ -18,7 +18,7 @@
         <span>👥</span> All Applicants
       </a>
     @else
-      <a href="{{ route('dashboard') }}" class="nav-item">
+      <a href="{{ route('applications.index') }}" class="nav-item {{ request()->routeIs('applications.index') ? 'active' : '' }}">
         <span>💼</span> My Applications
       </a>
       <a href="{{ route('jobs.index') }}" class="nav-item {{ request()->routeIs('jobs.index') ? 'active' : '' }}">
