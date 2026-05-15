@@ -52,7 +52,7 @@
       <div class="stat-label">Interviews</div>
       <div class="stat-trend trend-up">↑ Scheduled</div>
     </div>
-    <div class="stat-card" onclick="window.location.href='{{ route('applications.index') }}'" style="cursor:pointer;">
+    <div class="stat-card" onclick="window.location.href='{{ route('seeker.offers') }}'" style="cursor:pointer;">
       <div class="stat-icon" style="background:rgba(167, 139, 250, 0.1); color:var(--violet);">🎉</div>
       <div class="stat-value" style="color:var(--violet);" data-target="{{ $applications->where('status', 'offer')->count() }}">0</div>
       <div class="stat-label">Offers Received</div>

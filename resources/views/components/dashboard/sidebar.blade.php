@@ -35,6 +35,7 @@
     @else
       <a href="{{ route('seeker.analyzer') }}" class="nav-item {{ request()->routeIs('seeker.analyzer') ? 'active' : '' }}"><span>📄</span> Resume Analyzer</a>
       <a href="{{ route('seeker.interviews') }}" class="nav-item {{ request()->routeIs('seeker.interviews') ? 'active' : '' }}"><span>🗓</span> My Interviews</a>
+      <a href="{{ route('seeker.offers') }}" class="nav-item {{ request()->routeIs('seeker.offers') ? 'active' : '' }}"><span>🎉</span> Job Offers</a>
     @endif
     
     <a href="{{ route('messages.index') }}" class="nav-item {{ request()->routeIs('messages.*') ? 'active' : '' }}">

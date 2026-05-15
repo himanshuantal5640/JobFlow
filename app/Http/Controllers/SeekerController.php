@@ -63,6 +63,18 @@ class SeekerController extends Controller
         return view('seeker.interviews', compact('interviews'));
     }
 
+    public function offers()
+    {
+        $user = Auth::user();
+        $offers = Application::where('user_id', $user->id)
+            ->where('status', 'offer')
+            ->with('jobPost')
+            ->latest()
+            ->get();
+
+        return view('seeker.offers', compact('offers'));
+    }
+
     public function profile()
     {
         return view('seeker.profile', ['user' => Auth::user()]);

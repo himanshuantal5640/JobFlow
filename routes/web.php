@@ -64,6 +64,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/applications', [SeekerController::class, 'applications'])->name('applications.index');
     Route::get('/applications/{application}/offer', [SeekerController::class, 'showOffer'])->name('applications.offer');
     Route::post('/applications/{application}/offer/decision', [SeekerController::class, 'offerDecision'])->name('applications.offer.decision');
+    Route::get('/seeker/offers', [SeekerController::class, 'offers'])->name('seeker.offers');
     Route::get('/seeker/interviews', [SeekerController::class, 'interviews'])->name('seeker.interviews');
     Route::get('/seeker/profile', [SeekerController::class, 'profile'])->name('seeker.profile');
     Route::post('/seeker/profile', [SeekerController::class, 'updateProfile'])->name('seeker.profile.update');

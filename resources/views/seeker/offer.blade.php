@@ -67,7 +67,7 @@
             <h3 style="color:var(--text); font-size:18px; margin-bottom:8px;">Official Offer Letter</h3>
             <p style="color:var(--text3); font-size:13px; margin-bottom:20px;">Please review the detailed terms and conditions in the attached PDF document.</p>
             @if($application->offer_letter_path)
-                <a href="{{ Storage::url($application->offer_letter_path) }}" target="_blank" class="btn btn-teal" style="display:inline-flex; padding:12px 32px;">Download Offer PDF ⬇</a>
+                <a href="{{ Storage::url($application->offer_letter_path) }}" target="_blank" class="btn btn-teal" style="display:inline-flex; padding:14px 40px; background:var(--violet); color:white; border-radius:14px; font-weight:700; text-decoration:none; box-shadow:0 10px 20px rgba(167, 139, 250, 0.2);">Download Offer PDF ⬇</a>
             @else
                 <p style="color:var(--amber); font-size:12px;">Offer letter document is being prepared.</p>
             @endif
