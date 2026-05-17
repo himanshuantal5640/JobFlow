@@ -124,13 +124,6 @@
             </div>
         </div>
 
-        <div class="social-row">
-            <button type="button" class="social-btn"><img src="https://www.google.com/favicon.ico" width="14"> Continue with Google</button>
-            <button type="button" class="social-btn"><img src="https://www.linkedin.com/favicon.ico" width="14"> Continue with LinkedIn</button>
-        </div>
-
-        <div class="divider"><span>or use email</span></div>
-
         <button type="button" onclick="nextStep(2)" class="submit-btn">
           <span>Continue with Email →</span>
         </button>

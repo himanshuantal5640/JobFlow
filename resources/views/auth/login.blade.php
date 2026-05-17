@@ -80,14 +80,6 @@
       <p class="form-subtitle">Don't have an account? <a href="{{ route('register') }}">Sign up free</a></p>
     </div>
 
-    <!-- Social Row -->
-    <div class="social-row">
-        <button class="social-btn"><img src="https://www.google.com/favicon.ico" width="16"> Google</button>
-        <button class="social-btn"><img src="https://www.linkedin.com/favicon.ico" width="16"> LinkedIn</button>
-    </div>
-
-    <div class="divider"><span>or continue with email</span></div>
-
     <form method="POST" action="{{ route('login.post') }}">
       @csrf
       <div class="field">
