@@ -281,10 +281,11 @@
         </select>
       </div>
       <div class="mf">
-        <div class="upload-box" onclick="alert('Opening file picker…')">
+        <input type="file" id="resumeInput" name="resume" accept=".pdf,.docx" style="display:none;" onchange="updateResumeName(this)">
+        <div class="upload-box" style="cursor:pointer;" onclick="document.getElementById('resumeInput').click()">
           <div class="ub-icon">📄</div>
-          <p>Upload a different resume</p>
-          <span>PDF or DOCX · Max 5MB</span>
+          <p id="uploadText">Upload a different resume</p>
+          <span id="uploadSubtext">PDF or DOCX · Max 5MB</span>
         </div>
       </div>
       <div class="mf">
@@ -398,6 +399,28 @@
 
 @section('scripts')
 <script>
+    function updateResumeName(input) {
+        if (input.files && input.files[0]) {
+            const fileName = input.files[0].name;
+            document.getElementById('uploadText').textContent = fileName;
+            document.getElementById('uploadSubtext').textContent = 'Selected';
+            
+            // Get the select element
+            const select = document.querySelector('.mi');
+            if (select) {
+                // Check if we already added a "New" option
+                let option = select.querySelector('option[value="uploaded"]');
+                if (!option) {
+                    option = document.createElement('option');
+                    option.value = "uploaded";
+                    select.add(option);
+                }
+                option.text = "✓ " + fileName + " (New)";
+                select.value = option.text; // Select it
+            }
+        }
+    }
+
     // Sticky footer visibility
     window.addEventListener('scroll', () => {
         const hero = document.querySelector('.job-hero-details');

@@ -560,10 +560,11 @@
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 36px;
+  color-scheme: dark;
 }
 .mi:focus { border-color: var(--v2); box-shadow: 0 0 0 3px rgba(124,58,237,0.2); background-color: #23273f; }
 .mi::placeholder { color: var(--text3-details); }
-.mi option { background: #1a1d2e; color: #ffffff; padding: 10px; }
+/* Removed option styling to prevent white-on-white text in some browsers */
 
 .upload-box {
   border: 1.5px dashed var(--border2); border-radius: var(--r);
